@@ -1,0 +1,26 @@
+pknotsRG 1.3
+Copyright (C) 2004-2006 Jens Reeder, Robert Giegerich, Peter Steffen
+Send comments/bug reports to: J.Reeder <jreeder@techfak.uni-bielefeld.de>.
+Updates: http://bibiserv.techfak.uni-bielefeld.de/pknotsrg/
+
+                         Disclaimer and Copyright
+
+pknotsRG is free software. It is distributed in the hope that it will
+be useful but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+Permission is granted for research, educational, and commercial use
+and modification so long as 1) the package and any derived works are
+not redistributed for any fee, other than media costs, 2) proper
+credit is given to the authors.
+
+If you want to include this software in a commercial product, please contact 
+the authors. 
+
+-----------------------------------------------------------------------------
+
+pknotsRG contains code from the following contributors:
+
+* Editline library (libedit):
+  Copyright (C) 1997-2003 The NetBSD Foundation, Inc.
+  All rights reserved.

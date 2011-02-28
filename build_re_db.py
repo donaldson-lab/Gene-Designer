@@ -67,10 +67,18 @@ class db():
         if name:
             fields = [name] + self.read_other_fields(file)
             blunt = fields[2].find('^') #Get location of ^ (if any)
+            if blunt != -1:
+                a = fields[2].split('^')[0]
+                b = fields[2].split('^')[1]
+                if len(a) != len(b):
+                    blunt = -2
+                    downstream_top = fields[2].find('^')
+                    downstream_bottom = len(fields[2]) - fields[2].find('^') -1
             fields[6] = filter(lambda x: x.isalpha(), fields[2]) #Get the pattern that is recognized (only letters)
             # Parse the fields for cutting information and add to tuple
             tmp = fields[2].split('/')
-            downstream_top = filter(lambda x: x is '-' or x.isdigit(), tmp[0])
+            if blunt != -2:
+                downstream_top = filter(lambda x: x is '-' or x.isdigit(), tmp[0])
             if len(tmp) == 3:
                 tmp1 = tmp[1].find(')')
                 tmp2 = tmp[1].find('(')
@@ -82,9 +90,15 @@ class db():
                 downstream_bottom = tmp[2][:-1]
             elif len(tmp) == 2:
                 downstream_bottom = filter(lambda x: x is '-' or x.isdigit(), tmp[1])
-                upstream_top = upstream_bottom = ""
+                if blunt == -2:
+                    upstream_top = upstream_bottom = ""
+                else:
+                    downstream_bottom = upstream_top = upstream_bottom = ""
             else:
-                downstream_bottom = upstream_top = upstream_bottom = ""
+                if blunt == -2:
+                    upstream_top = upstream_bottom = ""
+                else:
+                    downstream_bottom = upstream_top = upstream_bottom = ""
             fields[0] = fields[0].replace('.','') #Remove '.' from enzyme names
             fields[0] = fields[0].replace('-','') #Remove '-' from enzyme names
             methylase = ''

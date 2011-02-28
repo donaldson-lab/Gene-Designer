@@ -1,0 +1,30 @@
+pknotsRG 1.3
+Copyright (C) 2004-2006 Jens Reeder, Robert Giegerich, Peter Steffen
+Send comments/bug reports to: J.Reeder <jreeder@techfak.uni-bielefeld.de>.
+Updates: http://bibiserv.techfak.uni-bielefeld.de/pknotsrg/
+
+Quickstart
+------------
+Type
+    ./configure
+    make
+    make install
+
+to configure, make and install pknotsRG.
+
+Type 
+    pknotsRG -h
+
+for command line options overview and 
+
+    pknotsRG -H <option>
+
+for information on a specific option (e.g. pknotsRG -H -q).
+
+See "pknotsRG.pdf" for the user's manual and an introduction to
+pknotsRG.
+
+Also see 
+    "INSTALL"        for detailed installation instructions, and
+    "COPYING"        for disclaimer and copyright.
+

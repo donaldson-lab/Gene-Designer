@@ -46,6 +46,7 @@ ID_HELP = 118
 ID_HOMOLOGY = 119
 ID_TEMPLATES = 120
 ID_NEWTEMPLATES = 121
+ID_CURRENT = 122
 
 class Search():
     
@@ -55,9 +56,9 @@ class Search():
     def find_pattern(self, sequence, pattern):
         pattern = pattern.upper()
         #Build a regular expression based off of the pattern and search the sequence for the target reg. exp. Allows for ambiguous nucleotides
-        dna = 'ACGT'
+        dna = 'ACGTU'
         target = ''
-        dictionary = {'N':'[ACGT]','R':'[AG]', 'Y': '[CT]', 'W':'[AT]','S':'[GC]','M':'[AC]', 'K':'[GT]', 'B':'[CGT]', 'D':'[AGT]', 'H':'[ACT]', 'V':'[ACG]'} #Dictionary of ambiguous bases
+        dictionary = {'N':'[ACGTU]','R':'[AG]', 'Y': '[CT]', 'W':'[AT]','S':'[GC]','M':'[AC]', 'K':'[GT]', 'B':'[CGT]', 'D':'[AGT]', 'H':'[ACT]', 'V':'[ACG]'} #Dictionary of ambiguous bases
         for char in pattern:
             if char in dna:
                 target += char
@@ -138,7 +139,7 @@ class Search():
             qlist = []
             bluntlist = []
             uplist = []
-            downlist = []
+            down_list = []
             split_list = []
             cut = self.db_cutting_info(enz)[0] #Get enzyme cutting information
             result = self.find_pattern(str(sequence), pattern_dict[enz]) #Match pattern
@@ -147,7 +148,12 @@ class Search():
             if result == []:
                 nohit_list.append(str(enz)) #If no match, add enzyme to nohitlist
             if left_range == None and right_range == None: #If no ranges specified
-                if cut[enz][4] != -1: #Enzyme makes blunt cut
+                if cut[enz][4] == -2:
+                            for num in result:
+                                split_list.append(num)
+                                down_list.append([num + int(cut[enz][0]), num + int(cut[enz][1])])
+                                downdict[str(enz)] = down_list
+                if cut[enz][4] != -1 and cut[enz][4] == -2: #Enzyme makes blunt cut
                     for num in result:
                         bluntlist.append(num)
                         qlist.append(num + cut[enz][4])
@@ -161,8 +167,8 @@ class Search():
                     if cut[enz][0] != '' and cut[enz][1] != '': #Enzyme cuts strands differently downstream
                         for num in result:
                             split_list.append(num)
-                            downlist.append([num + int(cut[enz][0])+ len(item), num + int(cut[enz][1])+ len(item)])
-                        downdict[str(enz)] = downlist
+                            down_list.append([num + int(cut[enz][0])+ len(item), num + int(cut[enz][1])+ len(item)])
+                        downdict[str(enz)] = down_list
                     if cut[enz][2] != '' and cut[enz][3] != '': #Enzyme cuts strands differently upstream
                         for num in result:
                             split_list.append(num)
@@ -191,8 +197,8 @@ class Search():
                             b = num + int(cut[enz][1])
                             if (t >= int(left_range) and b >= int(left_range)) or (t <= int(right_range) and b <= int(right_range)):
                                 down = [num + int(cut[enz][0])+ len(item), num + int(cut[enz][1])+ len(item)]
-                                downlist.append(down)
-                        downdict[str(enz)] = downlist
+                                down_list.append(down)
+                        downdict[str(enz)] = down_list
                     if cut[enz][2] != '' and cut[enz][3] != '': #Enzyme cuts strands differently upstream
                         for num in result:
                             split_list.append(num)
@@ -229,29 +235,37 @@ class Search():
             print "%s appears at: %s" %(item, result)
             if result == []:
                 nohit_list.append(str(enz))
+         
             else:
                 if left_range == None and right_range == None: #If no ranges specified
-                    if cut[enz][4] != -1: #Enzyme makes blunt cut
+                    if cut[enz][4] == -2:
+                            for num in result:
+                                split_list.append(num)
+                                down_list.append([num + int(cut[enz][0]), num + int(cut[enz][1])])
+                                downdict[str(enz)] = down_list
+                    if cut[enz][4] != -1 and cut[enz][4] != -2: #Enzyme makes blunt cut
                         for num in result:
                             blunt_list.append(num)
                             qlist.append(num + cut[enz][4])
                             bluntdict[str(enz)] = qlist  
                     else:
+                        
                         if cut[enz][0] == '' and cut[enz][1] == '' and cut[enz][2] == '' and cut[enz][3] == '' and cut[enz][4] == -1: #Enzyme makes blunt cut at end of pattern
                             for num in result: 
                                 blunt_list.append(num)
                                 qlist.append(num + len(item))
-                                bluntdict[str(enz)] = qlist 
-                        if cut[enz][0] != '' and cut[enz][1] != '': #Enzyme cuts strands differently downstream
-                            for num in result:
-                                split_list.append(num)
-                                down_list.append([num + int(cut[enz][0]) + len(item), num + int(cut[enz][1]) + len(item)])
-                                downdict[str(enz)] = down_list
-                        if cut[enz][2] != '' and cut[enz][3] != '': #Enzyme cuts strands differently upstream
-                            for num in result:
-                                split_list.append(num)
-                                up_list.append([num - int(cut[enz][2]), num - int(cut[enz][3])])
-                                updict[str(enz)] = up_list
+                                bluntdict[str(enz)] = qlist
+                        if cut[enz][4] !=-2:
+                            if cut[enz][0] != '' and cut[enz][1] != '': #Enzyme cuts strands differently downstream
+                                for num in result:
+                                    split_list.append(num)
+                                    down_list.append([num + int(cut[enz][0]) + len(item), num + int(cut[enz][1]) + len(item)])
+                                    downdict[str(enz)] = down_list
+                            if cut[enz][2] != '' and cut[enz][3] != '': #Enzyme cuts strands differently upstream
+                                for num in result:
+                                    split_list.append(num)
+                                    up_list.append([num - int(cut[enz][2]), num - int(cut[enz][3])])
+                                    updict[str(enz)] = up_list
                 else: #No ranges specified
                     if cut[enz][4] != -1: #Enzyme makes blunt cut
                         for num in result:
@@ -596,6 +610,19 @@ class MutationPanel(wx.Panel):
         self.right_range_out.SetValue("")
         self.right_mutation_range.SetValue("")
         self.right_range_in.SetValue("")
+        self.GetParent().GetPage(1).seq_disp.SetValue("")
+        self.GetParent().GetPage(1).new_seq_disp.SetValue("")
+        self.GetParent().GetPage(1).aa_disp.SetValue("")
+        self.GetParent().GetPage(1).new_aa_disp.SetValue("")
+        self.GetParent().GetPage(1).deoptimize_left.SetValue("")
+        self.GetParent().GetPage(1).deoptimize_right.SetValue("")
+        self.GetParent().GetPage(1).optimize_left.SetValue("")
+        self.GetParent().GetPage(1).optimize_right.SetValue("")
+        self.GetParent().GetPage(1).reversion_box.SetValue(0)
+        self.GetParent().GetPage(1).seq_freq.SetValue(0)
+        self.GetParent().GetPage(1).specific_text.SetValue("")
+        self.GetParent().GetPage(1).specific_deopt_button.SetValue(1)
+        self.GetParent().GetPage(1).export_button.Disable()
         self.GetParent().GetParent().GetParent().organisms.Check(104,1)
         
     def move_cursor(self, event):
@@ -821,26 +848,26 @@ class MutationPanel(wx.Panel):
                         i = 0
                         for site, orig, new in zip(insert_list, olist, nlist):
                             if i == len(insert_list)-1:
-                                title = title + orig + ' to ' + new + ' at ' + str(site+1)
+                                title = title + orig + str(site+1) + new 
                             else:
-                                title = title + orig + ' to ' + new + ' at ' + str(site+1) + ', '
+                                title = title + orig + str(site+1) + new + '.'
                             i +=1
-                        mutseqs = '>Mutant-' + title + '\n'
+                        mutseqs = '>' + title + '\n'
                         mutseqs = mutseqs + str(oseq)
-                        aamuts = '>Mutant-' + title + '\n'
+                        aamuts = '>' + title + '\n'
                         aamuts = aamuts + str(Seq.translate(Seq(new_seq)))
                     else:
                         i = 0
                         for site, orig, new in zip(insert_list, olist, nlist):
                             title = ''
                             if i == len(insert_list)-1:
-                                title = title + orig + ' to ' + new + ' at ' + str(site+1)
+                                title = title + orig + str(site+1) + new 
                             else:
-                                title = title + orig + ' to ' + new + ' at ' + str(site+1) + ', '
+                                title = title + orig + str(site+1) + new + '.'
                             i +=1
-                        mutseqs = mutseqs + '\n' +'>Mutant-' +  title + '\n'
+                        mutseqs = mutseqs + '\n' +'>' +  title + '\n'
                         mutseqs= mutseqs + oseq
-                        aamuts = aamuts + '\n' + '>Mutant-' + title + '\n'
+                        aamuts = aamuts + '\n' + '>' + title + '\n'
                         aamuts = aamuts + str(Seq.translate(Seq(new_seq)))
                     j += 1 
             else: #Random mutations
@@ -975,7 +1002,14 @@ class MutationPanel(wx.Panel):
         total_cdn = self.codon_dict(str(self.seq_disp.GetValue()))[1]
         self.dlg = CdnFreqFrame(self, -1, cdn_dict, total_cdn)
         self.dlg.Show(True)
-        return cdn_dict   
+        return cdn_dict
+    
+    def cdn_frequency(self):
+        cdn_dict = self.codon_dict(str(self.seq_disp.GetValue()))[0]
+        total_cdn = self.codon_dict(str(self.seq_disp.GetValue()))[1]
+        self.dlg = CdnFreqFrame(self, -1, cdn_dict, total_cdn)
+        self.dlg.Show(True)
+        return cdn_dict
     
     def aa_frequency(self, event):
         #Get frequency of appearance of amino acids in translated sequence and display in table
@@ -1015,16 +1049,19 @@ class MutationPanel(wx.Panel):
         self.seq_value(self.previous_seq)  
         
     def codon_usage_retrieve(self, cdn_list, organism):
-        #Get dictionary of appearance frequency for list of codons in selected organism
-        db = 'codon_usage.db'
-        connection = sqlite3.connect(db)
-        cursor = connection.cursor()
         codon_percentage = {}
-        for codon in cdn_list:
-            cursor.execute('SELECT %s FROM %s' %(codon,organism))
-            for row in cursor:
-                if row[0] != None:
-                    codon_percentage[codon] = row[0]
+        #Get dictionary of appearance frequency for list of codons in selected organism
+        if self.GetParent().GetParent().GetParent().get_organism() == 'Current sequence':
+            codon_percentage = self.cdn_frequency
+        else:
+            db = 'codon_usage.db'
+            connection = sqlite3.connect(db)
+            cursor = connection.cursor()
+            for codon in cdn_list:
+                cursor.execute('SELECT %s FROM %s' %(codon,organism))
+                for row in cursor:
+                    if row[0] != None:
+                        codon_percentage[codon] = row[0]
         return codon_percentage
     
     def random_amino_acid_mutations(self, event):
@@ -1207,25 +1244,25 @@ class MutationPanel(wx.Panel):
             i = 0
             for site, orig, new in zip(ilist, olist, nlist):
                 if i == len(ilist)-1:
-                    title = title + orig + ' to ' + new + ' at ' + str(site)
+                    title = title + orig + str(site) + new
                 else:
-                    title = title + orig + ' to ' + new + ' at ' + str(site) + ', '
+                    title = title + orig + str(site) + new +'.'
                 i +=1
-            mut_seq = '>Mutant-' + title + '\n'
+            mut_seq = '>'+title + '\n'
             mut_seq = mut_seq + new_seq
-            aa_seq = '>Mutant-' + title + '\n'
+            aa_seq = '>' + title + '\n'
             aa_seq = aa_seq + str(AAseq)
         else:
             title = ''
             i = 0
             for site, orig, new in zip(ilist, olist, nlist):
                 if i == len(ilist)-1:
-                    title = title + orig + ' to ' + new + ' at ' + str(site)
+                    title = title + orig + str(site) + new
                 else:
-                    title = title + orig + ' to ' + new + ' at ' + str(site) + ', '
-            mut_seq = mut_seq + '\n' +'>Mutant-' +  title + '\n'
+                    title = title + orig + str(site) + new+ '.'
+            mut_seq = mut_seq + '\n' +'>' +  title + '\n'
             mut_seq = mut_seq + new_seq
-            aa_seq = aa_seq + '\n' + '>Mutant-' + title + '\n'
+            aa_seq = aa_seq + '\n' + '>' + title + '\n'
             aa_seq = aa_seq + str(AAseq)
         self.mlist.append(ilist)
         self.mutation_seq_disp.SetValue(mut_seq)
@@ -2318,9 +2355,13 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
         self.specific_opt_button = wx.RadioButton(self, wx.ID_ANY, 'Optimize')
         self.specific_deopt_button = wx.RadioButton(self, wx.ID_ANY, 'Deoptimize')
         self.specific_deopt_button.SetValue(1)
-        self.rna_structure = wx.CheckBox(self, 11, 'Preserve RNA Secondary Structure')
+        self.rna_structure = wx.CheckBox(self, 11, 'RNA Secondary Structure')
         self.reset_button = wx.Button(self, -1, 'Reset')
         self.reset_button.Bind(wx.EVT_LEFT_DOWN, self.reset)
+        self.pseudoknot = wx.Button(self, -1, 'Detect Pseudoknots')
+        self.pseudoknot.Bind(wx.EVT_LEFT_DOWN, self.pseudoknot_detect)
+        self.pseudoknot_disp = wx.TextCtrl(self, size = (500, 150), style = wx.TE_MULTILINE)
+        self.pseudoknot_label = wx.StaticText(self, wx.ID_ANY, 'Pseudoknots:')
         #Create and add objects to sizers
         self.seqsizer = wx.BoxSizer(wx.VERTICAL)
         self.aasizer = wx.BoxSizer(wx.VERTICAL)
@@ -2337,6 +2378,7 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
         self.reversionsizer = wx.BoxSizer(wx.HORIZONTAL)
         self.specific_text_sizer = wx.BoxSizer(wx.VERTICAL)
         self.specific_button_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.pseudoknot_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.specific_text_sizer.AddMany([(self.specific_text_info, 0, wx.TOP, 10), (self.specific_text, 0, wx.TOP, 10)])
         self.specific_button_sizer.AddMany([self.specific_deopt_button, self.specific_opt_button])
         self.seqsizer.AddMany([(self.seq_disp_label, 0, wx.TOP|wx.LEFT,5), (self.seq_disp, 0, wx.TOP|wx.LEFT|wx.RIGHT, 5)])
@@ -2350,11 +2392,43 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
         self.optimizerangesizer.AddMany([self.optimize_label, (self.optimize_left, 0, wx.LEFT, 5), self.optimize_colon, self.optimize_right])
         self.buttonsizer.AddMany([(self.deoptimizer_button, 0, wx.TOP, -25), (self.optimizer_button, 0, wx.TOP, -25)]) #,(self.attenuator_button, 0 ,wx.TOP, -25)])
         self.reversionsizer.AddMany([(self.reversion_box, 0, wx.RIGHT, 10), self.seq_freq, (self.rna_structure)])
+        self.pseudoknot_sizer.AddMany([self.pseudoknot, (self.pseudoknot_label, 0, wx.LEFT, 20), (self.pseudoknot_disp, 0, wx.LEFT, 10)])
         self.opt_ops_sizer.AddMany([(self.buttonsizer, 0 , wx.TOP, -25), (self.reversionsizer, 0, wx.TOP|wx.BOTTOM, 5), self.deoptimizerangesizer, (self.optimizerangesizer, 0, wx.TOP, 10)])
-        self.totalsizer.AddMany([self.total_seq_sizer, (self.opt_ops_sizer, 0, wx.TOP|wx.LEFT, 5), (self.specific_text_sizer, 0, wx.TOP|wx.LEFT, 5), (self.specific_button_sizer, 0, wx.TOP|wx.LEFT, 5), (self.reset_button, 0, wx.TOP|wx.LEFT, 20)])
+        self.totalsizer.AddMany([self.total_seq_sizer, (self.opt_ops_sizer, 0, wx.TOP|wx.LEFT, 5), (self.specific_text_sizer, 0, wx.TOP|wx.LEFT, 5), (self.specific_button_sizer, 0, wx.TOP|wx.LEFT, 5), (self.pseudoknot_sizer, 0, wx.TOP|wx.LEFT, 10),(self.reset_button, 0, wx.TOP, -10),])
         self.SetSizerAndFit(self.totalsizer)
         
     def reset(self, event):
+        self.seq_disp.SetValue("")
+        self.seq_gc_disp.SetValue("")
+        self.vector_disp.SetValue("")
+        self.mutation_aa_disp.SetValue("")
+        self.mutation_seq_disp.SetValue("")
+        self.mutation_seq_gc_disp.SetValue("")
+        self.position_disp.SetValue("")
+        self.enzyme_listbox.SetSelection(-1)
+        self.rf = 1
+        self.GetParent().GetPage(0).onecut.SetValue(True)
+        self.GetParent().GetPage(0).twocut.SetValue(False)
+        self.GetParent().GetPage(0).threecut.SetValue(False)
+        self.GetParent().GetPage(0).allcut.SetValue(False)
+        self.GetParent().GetPage(0).export_button.Disable()
+        self.GetParent().GetPage(0).silent.SetValue(True)
+        self.GetParent().GetPage(0).num.SetValue(1)
+        self.GetParent().GetPage(0).num_mutants.SetValue(1)
+        self.GetParent().GetPage(0).num_aa_mutations.SetValue(1)
+        self.GetParent().GetPage(0).reversion_box.SetValue(False)
+        self.GetParent().GetPage(0).vector_listbox.SetSelection(-1)
+        self.GetParent().GetPage(0).aa_left_mutation_range.SetValue("")
+        self.GetParent().GetPage(0).aa_right_mutation_range.SetValue("")
+        self.GetParent().GetPage(0).fragment_length_disp.SetValue("")
+        self.GetParent().GetPage(0).overlap_length_disp.SetValue("")
+        self.GetParent().GetPage(0).commercial_box.SetValue(False)
+        self.GetParent().GetPage(0).left_range_out.SetValue("")
+        self.GetParent().GetPage(0).left_mutation_range.SetValue("")
+        self.GetParent().GetPage(0).left_range_in.SetValue("")
+        self.GetParent().GetPage(0).right_range_out.SetValue("")
+        self.GetParent().GetPage(0).right_mutation_range.SetValue("")
+        self.GetParent().GetPage(0).right_range_in.SetValue("")
         self.seq_disp.SetValue("")
         self.new_seq_disp.SetValue("")
         self.aa_disp.SetValue("")
@@ -2370,6 +2444,38 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
         self.export_button.Disable()
         self.GetParent().GetPage(0).rf =1
         self.GetParent().GetParent().GetParent().organisms.Check(104,1)
+        
+    def pseudoknot_detect(self, event):
+        file = './tmp.fasta'
+        with open ('tmp.fasta', 'w') as filename:
+            filename.write('>\n' + str(self.seq_disp.GetValue()))
+        os.system('python KnotSeeker.py %s' %file)
+        i = 0
+        string = ""
+        with open('output.txt', 'r') as file:
+            for line in file:
+                if i == 0:
+                    string = string + 'Pseudoknot start:' + line
+                if i == 1:
+                    string = string + 'Pseudoknot end:' + line
+                if i == 2:
+                    string = string + 'Energy:' + line
+                if i == 3:
+                    string = string + line + '\n'
+                    i = -1
+                i += 1
+        self.pseudoknot_disp.SetValue(string)
+        os.remove('output.txt')
+        os.remove('pknotsRG_input.txt')
+        os.remove('pknotsRG_output.txt')
+        os.remove('guugle_output.txt')
+        os.remove('hairpir_bulge.txt')
+        os.remove('stem_structure.txt')
+        os.remove('stems_energy.txt')
+        os.remove('tmp.fasta')
+        os.remove('input.fasta')
+                    
+        
         
     def specific_optimization(self, event):
         #Method which allows user to specify specific amino acids or codons to optimize
@@ -2887,9 +2993,9 @@ class CuttingPanel(wx.Panel):
                                 if num_items_blunt not in methyl_blunt:
                                     methyl_blunt.append(num_items_blunt)
                 self.bluntlc.InsertStringItem(num_items_blunt, key)
-                self.bluntlc.SetStringItem(num_items_blunt, 1, str(int(site)+1))
-                self.bluntlc.SetStringItem(num_items_blunt, 2, str((int(start[j]) + length) -(int(site)-start[j])+2))
-                self.bluntlc.SetStringItem(num_items_blunt, 3, str(int(start[j])+1))
+                self.bluntlc.SetStringItem(num_items_blunt, 1, str(int(site)))
+                self.bluntlc.SetStringItem(num_items_blunt, 2, str((int(start[j]) + length) -(int(site)-start[j])+1))
+                self.bluntlc.SetStringItem(num_items_blunt, 3, str(int(start[j])))
                 j +=1
                 
         #for number in methyl_blunt:
@@ -2938,9 +3044,9 @@ class CuttingPanel(wx.Panel):
                                 if num_items_down not in methyl_down:
                                     methyl_down.append(num_items_down)
                 self.downlc.InsertStringItem(num_items_down, k)
-                self.downlc.SetStringItem(num_items_down, 1, str(int(down)+1))
-                self.downlc.SetStringItem(num_items_down, 2, str(int(up)+1))
-                self.downlc.SetStringItem(num_items_down, 3, str(int(start[j])+1))
+                self.downlc.SetStringItem(num_items_down, 1, str(int(down)))
+                self.downlc.SetStringItem(num_items_down, 2, str(int(up)))
+                self.downlc.SetStringItem(num_items_down, 3, str(int(start[j])))
                 j+=1
                 
         self.uplc = wx.ListCtrl(self, -1, size = (360, 300), style = wx.LC_REPORT)
@@ -2989,7 +3095,7 @@ class CuttingPanel(wx.Panel):
                 self.uplc.InsertStringItem(num_items_up, k)
                 self.uplc.SetStringItem(num_items_up, 1, int(down))
                 self.uplc.SetStringItem(num_items_up, 2, int(up))
-                self.uplc.SetStringItem(num_items_up, 3, str(int(start[j])+1))
+                self.uplc.SetStringItem(num_items_up, 3, str(int(start[j])))
                 j+=1
                 
         self.nohitlc = wx.ListCtrl(self, -1, size = (100, 300), style = wx.LC_REPORT)
@@ -3022,12 +3128,10 @@ class CuttingPanel(wx.Panel):
             elist.append(str(self.bluntlc.GetItemText(self.bluntlc.GetFirstSelected())))
             slist.append(self.bluntlc.GetItem(self.bluntlc.GetNextItem(-1, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED), 2).GetText())
             n =self.bluntlc.GetNextSelected(self.bluntlc.GetFirstSelected())
-            print n
             while n != -1: #While there are more selected
                 elist.append(str(self.bluntlc.GetItemText(n)))
                 slist.append(self.bluntlc.GetItem(n, 2).GetText())
                 n = self.bluntlc.GetNextSelected(n)
-                print n
         if self.downlc.GetFirstSelected() != -1: #Check to see if any are selected
             elist.append(str(self.downlc.GetItemText(self.downlc.GetFirstSelected())))
             slist.append(self.downlc.GetItem(self.downlc.GetNextItem(-1, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED), 3).GetText())
@@ -3060,9 +3164,9 @@ class CuttingPanel(wx.Panel):
         
     def find_pattern(self, sequence, pattern):
         #Build a regular expression based off of the pattern and search the sequence for the target reg. exp. and count number of matches
-        dna = 'ACGT'
+        dna = 'ACGTU'
         target = ''
-        dictionary = {'N':'[ACGT]','R':'[AG]', 'Y': '[CT]', 'W':'[AT]','S':'[GC]','M':'[AC]', 'K':'[GT]', 'B':'[CGT]', 'D':'[AGT]', 'H':'[ACT]', 'V':'[ACG]'}
+        dictionary = {'N':'[ACGTU]','R':'[AG]', 'Y': '[CT]', 'W':'[AT]','S':'[GC]','M':'[AC]', 'K':'[GT]', 'B':'[CGT]', 'D':'[AGT]', 'H':'[ACT]', 'V':'[ACG]'}
         for char in pattern: #Build reg. exp.
             if char in dna:
                 target += char
@@ -3091,7 +3195,6 @@ class CuttingPanel(wx.Panel):
             orig_count = orig_count + self.find_pattern(self.seq, patterns[e])
         #Get range for mutation to alter site
         for e, s in zip(xrange(len(elist)), slist):
-            print s
             change = False
             s = int(s) -1
             length = len(patterns[elist[e]]) #length of enzyme pattern
@@ -3143,7 +3246,6 @@ class CuttingPanel(wx.Panel):
                                         maxc = k
                             segment = self.seq[prev_site:insert] + maxc + self.seq[insert+3:s+length]
                             segment_list.append(segment)
-                            print segment
                 #Same procedure but insert occurs in middle of codon
                 elif insert%3 == 1:
                     if insert+1 == len(self.seq) and insert != 1:
@@ -3177,7 +3279,6 @@ class CuttingPanel(wx.Panel):
                                         maxc = k
                             segment = self.seq[prev_site:insert-1] + maxc + self.seq[insert+2:s+length]
                             segment_list.append(segment)
-                            print segment
                 #Same procedure with insert occurring at end of a codon
                 elif insert%3 == 2:
                     region = self.seq[insert-2:insert+1]
@@ -3209,8 +3310,6 @@ class CuttingPanel(wx.Panel):
                                         maxc = k
                             segment = self.seq[prev_site:insert-2] + maxc + self.seq[insert+1:s+length]
                             segment_list.append(segment)
-                            print segment 
-            print segment_list
             prev_site = int(s)+length
             #If impossible to get rid of restriction site through silent mutations without creating new sites give warning message
             if range_list == []:
@@ -3563,6 +3662,7 @@ class MainFrame(wx.Frame):
         self.organisms.AppendSeparator()
         for row in cursor:
             row = str(row).split("\'")
+            self.organisms.AppendRadioItem(ID_CURRENT, 'Current sequence')
             self.organisms.AppendRadioItem(ID_ECOLIK12, row[1])
         self.vectors = wx.Menu()
         self.vectors.Append(ID_ADDVECTOR, 'Add Vector')
@@ -3918,6 +4018,7 @@ class MainFrame(wx.Frame):
         for item in self.organisms.GetMenuItems():
             if item.IsChecked():
                 organism = item.GetLabel()
+        print organism
         return organism
     
     def template(self, event):
