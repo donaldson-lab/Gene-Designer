@@ -52,13 +52,14 @@ class db():
 
 class AddOrgPanel(wx.Panel):
     #Frame set up with fields for getting data on organism codon usage
-    def __init__(self, parent, id):
+    def __init__(self, parent, id, text):
         wx.Panel.__init__(self, parent)
         self.addorg = 'Add Org'
         self.nb = parent
         self.organism_label = wx.StaticText(self, wx.ID_ANY, 'Organism:')
         self.organism = wx.TextCtrl(self)
         self.seq_entry = wx.TextCtrl(self, size = (600,300), style = wx.TE_PROCESS_ENTER|wx.TE_MULTILINE)
+        self.seq_entry.SetValue(text)
         self.seq_entry.Bind(wx.EVT_TEXT, self.remove_invalid_chars)
         self.seq_entry_info = wx.StaticText(self, wx.ID_ANY, 'Enter a sequence in the box below and the organism will be added to the database using computed codon frequencies.\nAlternatively you may enter the codon frequencies yourself as percentages out of 1000')
         self.TTTlabel = wx.StaticText(self, wx.ID_ANY, 'TTT')

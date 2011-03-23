@@ -675,10 +675,16 @@ def method(file):
     result = MWIS(list_energy, sorted_endpointlist)
         
     # print pseudoknots only #
+    f = open('output.txt', 'a')
     for j in range(len(result)):
         if result[j][5] == 'pk':
+            f.write(str(result[j][0])+'\n')
+            f.write(str(result[j][1])+'\n')
+            f.write(str(result[j][4])+'\n')
+            f.write(file[result[j][6]+1]+'\n')
             print result[j][0], result[j][1], result[j][4] 
             print file[result[j][6]+1]
+    f.close()
 
     for i in range(len(result)):
         result_large = result[i]

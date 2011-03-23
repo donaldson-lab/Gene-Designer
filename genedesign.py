@@ -915,13 +915,13 @@ class MutationPanel(wx.Panel):
                         i = 0
                         for site, orig, new in zip(insert_list, olist, nlist):
                             if i == len(insert_list)-1:
-                                title = title + orig + ' to ' + new + ' at ' + str(site+1)
+                                title = title + orig + str(site+1) + new 
                             else:
-                                title = title + orig + ' to ' + new + ' at ' + str(site+1) + ', '
+                                title = title + orig + str(site+1) + new + '.'
                             i +=1
-                        mutseqs = '>Mutant-' + title + '\n'
+                        mutseqs = '>' + title + '\n'
                         mutseqs = mutseqs + str(oseq)
-                        aamuts = '>Mutant-' + title + '\n'
+                        aamuts = '>' + title + '\n'
                         aamuts = aamuts + str(Seq.translate(Seq(new_seq)))
                     else:
                         title = ''
@@ -931,13 +931,13 @@ class MutationPanel(wx.Panel):
                                 i +=1
                             else:
                                 if i == len(insert_list)-1:
-                                    title = title + orig + ' to ' + new + ' at ' + str(site+1)
+                                    title = title + orig + str(site+1) + new 
                                 else:
-                                    title = title + orig + ' to ' + new + ' at ' + str(site+1) + ', '
+                                    title = title + orig + str(site+1) + new + '.'
                                 i +=1
-                        mutseqs = mutseqs + '\n' +'>Mutant-' +  title + '\n'
+                        mutseqs = mutseqs + '\n' +'>' +  title + '\n'
                         mutseqs= mutseqs + oseq
-                        aamuts = aamuts + '\n' + '>Mutant-' + title + '\n'
+                        aamuts = aamuts + '\n' + '>' + title + '\n'
                         aamuts = aamuts + str(Seq.translate(Seq(new_seq)))
                     j += 1
             #Write new sequences to displays
@@ -1052,7 +1052,7 @@ class MutationPanel(wx.Panel):
         codon_percentage = {}
         #Get dictionary of appearance frequency for list of codons in selected organism
         if self.GetParent().GetParent().GetParent().get_organism() == 'Current sequence':
-            codon_percentage = self.cdn_frequency
+            codon_percentage = self.cdn_frequency()
         else:
             db = 'codon_usage.db'
             connection = sqlite3.connect(db)
@@ -2399,13 +2399,13 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
         
     def reset(self, event):
         self.seq_disp.SetValue("")
-        self.seq_gc_disp.SetValue("")
-        self.vector_disp.SetValue("")
-        self.mutation_aa_disp.SetValue("")
-        self.mutation_seq_disp.SetValue("")
-        self.mutation_seq_gc_disp.SetValue("")
-        self.position_disp.SetValue("")
-        self.enzyme_listbox.SetSelection(-1)
+        self.GetParent().GetPage(0).seq_gc_disp.SetValue("")
+        self.GetParent().GetPage(0).vector_disp.SetValue("")
+        self.GetParent().GetPage(0).mutation_aa_disp.SetValue("")
+        self.GetParent().GetPage(0).mutation_seq_disp.SetValue("")
+        self.GetParent().GetPage(0).mutation_seq_gc_disp.SetValue("")
+        self.GetParent().GetPage(0).position_disp.SetValue("")
+        self.GetParent().GetPage(0).enzyme_listbox.SetSelection(-1)
         self.rf = 1
         self.GetParent().GetPage(0).onecut.SetValue(True)
         self.GetParent().GetPage(0).twocut.SetValue(False)
@@ -2469,14 +2469,12 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
         os.remove('pknotsRG_input.txt')
         os.remove('pknotsRG_output.txt')
         os.remove('guugle_output.txt')
-        os.remove('hairpir_bulge.txt')
+        os.remove('hairpin_bulge.txt')
         os.remove('stem_structure.txt')
         os.remove('stems_energy.txt')
         os.remove('tmp.fasta')
         os.remove('input.fasta')
-                    
-        
-        
+                         
     def specific_optimization(self, event):
         #Method which allows user to specify specific amino acids or codons to optimize
         self.specific = True
@@ -3616,19 +3614,28 @@ class OpenReadingFramePanel(wx.Panel):
         self.display = wx.TextCtrl(self, style = wx.TE_MULTILINE) #Create textbox
         self.close_button = wx.Button(self, -1, 'Close Panel')
         self.close_button.Bind(wx.EVT_LEFT_DOWN, self.close_panel)
-        text = ''
+        self.add_button = wx.Button(self, -1, 'Add Reading Frame Codon Frequency to DB')
+        self.add_button.Bind(wx.EVT_LEFT_DOWN, self.add_org)
+        self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.text = ''
         number = 1
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.orf = True
         for start, end, frame in zip(starts, ends, frames): #Add frames and labels to text for addition to text box
-            text = text + 'Frame: %d ' %number +'\nStart: %s End: %s' %(start, end) +'\n' +frame + '\n' +'\n'
+            self.text = self.text + 'Frame: %d ' %number +'\nStart: %s End: %s' %(start, end) +'\n' +frame + '\n' +'\n'
             number += 1
-        self.display.SetValue(text) 
-        self.sizer.AddMany([(self.display, 1, wx.EXPAND), (self.close_button, 0, wx.LEFT| wx.TOP| wx.BOTTOM, 10)])
+        self.display.SetValue(self.text) 
+        self.button_sizer.AddMany([(self.close_button, 0, wx.LEFT|wx.TOP|wx.BOTTOM, 10), (self.add_button, 0, wx.LEFT|wx.TOP|wx.BOTTOM,10)])
+        self.sizer.AddMany([(self.display, 1, wx.EXPAND), (self.button_sizer)])
         self.SetSizerAndFit(self.sizer)
         
     def close_panel(self, event):
         self.GetParent().DeletePage(self.GetParent().GetSelection())
+        
+    def add_org(self, event):
+        self.nucleotides = self.text.split('\n')[2]
+        self.GetParent().GetParent().GetParent().add_organism(event)
+
         
 class MainFrame(wx.Frame):
     def __init__(self, parent, id, title, searchInstance, enzyme_list, target_list, vector_list):
@@ -3929,14 +3936,28 @@ class MainFrame(wx.Frame):
             self.min_AA = 1
         dlg.Destroy()
         self.frame_starts = [match.start() for match in re.finditer(re.escape('ATG'), self.seq)] #Find all possible starts for ORFs
+        self.frame_starts1 = [match.start() for match in re.finditer(re.escape('AUG'), self.seq)]
+        self.frame_starts = self.frame_starts + self.frame_starts1
         for start in self.frame_starts:
             if start != -1 and start%3 + 1 == self.rf:
                 self.frame_endA = filter(lambda x: x >start+self.min_AA*3 and x%3+1 == self.rf, [match.start() for match in re.finditer(re.escape('TAA'), self.seq)]) #Find all occurrences of TAA that fit the criteria
+                self.frame_endA1 = filter(lambda x: x >start+self.min_AA*3 and x%3+1 == self.rf, [match.start() for match in re.finditer(re.escape('UAA'), self.seq)])
                 self.frame_end_a = filter(lambda x: x>start and x%3+1 == self.rf, [match.start() for match in re.finditer(re.escape('TAA'), self.seq)]) #Find any other occurrences of TAA after start
+                self.frame_end_a1 = filter(lambda x: x>start and x%3+1 == self.rf, [match.start() for match in re.finditer(re.escape('UAA'), self.seq)])
+                self.frame_end_a = self.frame_end_a + self.frame_end_a1
                 self.frame_endB = filter(lambda x: x >start+self.min_AA*3 and x%3+1 == self.rf, [match.start() for match in re.finditer(re.escape('TAG'), self.seq)]) #Find all occurrences of TAG that fit criteria
+                self.frame_endB1 = filter(lambda x: x >start+self.min_AA*3 and x%3+1 == self.rf, [match.start() for match in re.finditer(re.escape('UAG'), self.seq)])
                 self.frame_end_b = filter(lambda x: x>start and x%3+1 == self.rf, [match.start() for match in re.finditer(re.escape('TAG'), self.seq)]) #Find any other occurrences of TAG after start
+                self.frame_end_b1 = filter(lambda x: x>start and x%3+1 == self.rf, [match.start() for match in re.finditer(re.escape('UAG'), self.seq)])
+                self.frame_end_b = self.frame_end_b + self.frame_end_b1
                 self.frame_endC = filter(lambda x: x >start+self.min_AA*3 and x%3+1 == self.rf, [match.start() for match in re.finditer(re.escape('TGA'), self.seq)]) #Find all occurrences of TGA that fit criteria
+                self.frame_endC1 = filter(lambda x: x >start+self.min_AA*3 and x%3+1 == self.rf, [match.start() for match in re.finditer(re.escape('UGA'), self.seq)])
                 self.frame_end_c = filter(lambda x: x>start and x%3+1 == self.rf, [match.start() for match in re.finditer(re.escape('TGA'), self.seq)]) #Find any other occurrences of TGA after start
+                self.frame_end_c1 = filter(lambda x: x>start and x%3+1 == self.rf, [match.start() for match in re.finditer(re.escape('UGA'), self.seq)])
+                self.frame_end_c = self.frame_end_c + self.frame_end_c1
+                self.frame_endA = self.frame_endA + self.frame_endA1
+                self.frame_endB = self.frame_endB + self.frame_endB1
+                self.frame_endC = self.frame_endC + self.frame_endC1
                 rflist = []
                 #Get first value from list if it exists otherwise set equal to length of sequence + 1
                 if self.frame_end_a != []:
@@ -4003,7 +4024,12 @@ class MainFrame(wx.Frame):
         
     def add_organism(self, event):
         #Launch frame for adding organism to codon usage db
-        self.organism_page = codon_usage_db.AddOrgPanel(self.nb, -1)
+        for page in self.nb.GetChildren():
+            if hasattr(page, 'nucleotides'):
+                text = page.nucleotides
+            else:
+                text = ""
+        self.organism_page = codon_usage_db.AddOrgPanel(self.nb, -1, text)
         self.nb.AddPage(self.organism_page, 'Add Organism')
         self.nb.SetSelection(self.nb.GetPageCount()-1)
     
@@ -4018,7 +4044,6 @@ class MainFrame(wx.Frame):
         for item in self.organisms.GetMenuItems():
             if item.IsChecked():
                 organism = item.GetLabel()
-        print organism
         return organism
     
     def template(self, event):
