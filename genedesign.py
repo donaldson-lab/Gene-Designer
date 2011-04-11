@@ -4076,7 +4076,7 @@ class MainFrame(wx.Frame):
         
         
 if __name__ == "__main__":
-    filename = os.getcwd() + '/type2.011' #File from REBASE
+    filename = os.getcwd() + '/type2.103' #File from REBASE
     if not os.path.exists('re.db'): #Create the restriction enzyme database if it doesn't exist already
         build_re_db.db.read_enzymes_from_file(build_re_db.db(filename), filename)
     if not os.path.exists('codon_usage.db'): #Create the codon usage database if it doesn't exist already
