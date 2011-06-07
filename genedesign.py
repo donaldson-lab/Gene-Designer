@@ -2335,6 +2335,8 @@ class OptimizationPanel(wx.Panel):
         self.reading_frame_button.Bind(wx.EVT_LEFT_DOWN, self.reading_frame)
         self.reversion_box = wx.CheckBox(self, 10,'Avoid Reversion')
         self.seq_freq = wx.CheckBox(self, 10, 'Use Sequence Codon Frequency to Optimize/Deoptimize')
+        self.reversion_box.SetValue(True)
+        self.seq_freq.SetValue(True)
         self.deoptimize_label = wx.StaticText(self, wx.ID_ANY, 'Deoptimization Range:')
         self.deoptimize_left = wx.TextCtrl(self, size = (40,20), style = wx.TE_PROCESS_ENTER)
         self.deoptimize_left.Bind(wx.EVT_TEXT, self.deoptimize_ranges)
