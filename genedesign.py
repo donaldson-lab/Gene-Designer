@@ -439,13 +439,13 @@ class MutationPanel(wx.Panel):
         self.aa_mut_colon = wx.StaticText(self.panel, wx.ID_ANY, ":")
         self.reversion_box = wx.CheckBox(self.panel, 10,'Avoid Reversion')
         #Fragment and potential site buttons
-        self.fragment_button = wx.Button(self.panel, -1, 'Fragment Sequence')
-        self.fragment_button.Bind(wx.EVT_LEFT_DOWN, self.fragment)
-        self.fragment_length_disp = wx.TextCtrl(self.panel, 11,size = (50,20), style = wx.TE_PROCESS_ENTER)
-        self.overlap_length_disp = wx.TextCtrl(self.panel, 12, size = (50,20), style = wx.TE_PROCESS_ENTER)
-        self.overlap_length_disp.SetValue(str(20))
-        self.fragment_length_text = wx.StaticText(self.panel, -1, 'Fragment Length:')
-        self.overlap_length_text = wx.StaticText(self.panel, -1, 'Overlap Length (min:20; max:100):')
+        #self.fragment_button = wx.Button(self.panel, -1, 'Fragment Sequence')
+        #self.fragment_button.Bind(wx.EVT_LEFT_DOWN, self.fragment)
+        #self.fragment_length_disp = wx.TextCtrl(self.panel, 11,size = (50,20), style = wx.TE_PROCESS_ENTER)
+        #self.overlap_length_disp = wx.TextCtrl(self.panel, 12, size = (50,20), style = wx.TE_PROCESS_ENTER)
+        #self.overlap_length_disp.SetValue(str(20))
+        #self.fragment_length_text = wx.StaticText(self.panel, -1, 'Fragment Length:')
+        #self.overlap_length_text = wx.StaticText(self.panel, -1, 'Overlap Length (min:20; max:100):')
         self.potential_button = wx.Button(self.panel, -1, 'Find Potential Sites')
         self.potential_button.Bind(wx.EVT_LEFT_DOWN, lambda evt, sequence = str(self.seq_disp.GetValue()): self.find_potential_sites(sequence, self.nb))
         #Enzyme list and options
@@ -528,10 +528,10 @@ class MutationPanel(wx.Panel):
         self.rangeinhoriz.AddMany([self.left_range_in, self.colon_in, self.right_range_in])
         self.rangeinvert.AddMany([self.range_in_label, self.rangeinhoriz])
         self.cutrangesizer.AddMany([self.rangeoutvert, self.rangeinvert])
-        self.fraghoriz1.AddMany([self.fragment_length_text, (self.fragment_length_disp, 1, wx.LEFT, 8)])
-        self.fraghoriz2.AddMany([self.overlap_length_text, (self.overlap_length_disp, 1, wx.LEFT, 5)])
-        self.fragvert.AddMany([self.fraghoriz1, (self.fraghoriz2, 0, wx.TOP, 5)])
-        self.fragmentsizer.AddMany([(self.fragvert, (0,0)), (self.fragment_button, (1,0)), (self.potential_button, (2,0)), (self.commercial_box, (3,0)), (self.deselect_button, (4,0))])
+        #self.fraghoriz1.AddMany([self.fragment_length_text, (self.fragment_length_disp, 1, wx.LEFT, 8)])
+        #self.fraghoriz2.AddMany([self.overlap_length_text, (self.overlap_length_disp, 1, wx.LEFT, 5)])
+        #self.fragvert.AddMany([self.fraghoriz1, (self.fraghoriz2, 0, wx.TOP, 5)])
+        self.fragmentsizer.AddMany([(self.potential_button, (1,0)), (self.commercial_box, (2,0)), (self.deselect_button, (3,0))])
         self.vector_listbox_sizer.AddMany([self.vector_listbox_label, (self.vector_listbox, 1, wx.EXPAND)])
         self.total_vector_sizer.AddMany([(self.vectorsizer, 1, wx.EXPAND), (self.vector_listbox_sizer, 0, wx.EXPAND|wx.LEFT, 10)])
         self.vectorsizer.AddMany([self.vector_label, (self.vector_disp, 1, wx.EXPAND|wx.LEFT, 3)])
@@ -4075,7 +4075,6 @@ class MainFrame(wx.Frame):
                     sequences.append(line.split('\n')[0])
                 prev_line = line
             return seq_names, sequences
-        
         
 if __name__ == "__main__":
     filename = os.getcwd() + '/type2.103' #File from REBASE
