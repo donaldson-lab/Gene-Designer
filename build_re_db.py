@@ -8,10 +8,8 @@ A module that sets up a database for the storage of data concerning restriction 
 sequence and its complement in the same place or at different locations, the pattern that the restriction enzyme recognizes, enzyme methylation data, and information on whether the enzyme is commercially available.
 Enzyme data comes from the Rebase database.  This code in this module is based on an example given by Mitchell L. Model in Bioinformatics Programming using Python
 '''
-
 import sqlite3
 import wx
-
 
 class db():
     
@@ -50,7 +48,7 @@ class db():
     
     def read_other_fields(self, file):
         #Read remaining fields after enzyme name and store as a 6-tupe
-        return [self.read_field(file) for n in range(6)] #Read 6 fields 
+        return [self.read_field(file) for n in range(6)] #Read 6 fields #@UnusedVariable
     
     def next_enzyme(self, file):
         #Read the data from the next enzyme and add the data to the database.
