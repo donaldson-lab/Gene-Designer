@@ -3,7 +3,6 @@ Created on Jul 12, 2010
 
 @author: Doug Crandell
 '''
-
 import os
 import build_re_db
 import codon_usage_db
@@ -48,8 +47,7 @@ ID_TEMPLATES = 120
 ID_NEWTEMPLATES = 121
 ID_CURRENT = 122
 
-class Search():
-    
+class Search():   
     def __init__(self):
         self = self
     
@@ -89,9 +87,7 @@ class Search():
                  
     def db_retrieve(self):
         #Retrieve list of enzymes from restriction enzyme database and build a dictionary with enzymes as keys and their target patterns as values
-        enzyme_list  = []
-        vector_list = []
-        pattern_dict = {}
+        enzyme_list, vector_list, pattern_dict  = [], [], {}
         connection = sqlite3.connect('re.db')
         cursor = connection.cursor()
         cursor.execute('SELECT r_enz_name, pattern FROM enzymes')
@@ -129,18 +125,10 @@ class Search():
     def find_sites_in(self, sequence, enz_list, left_range, right_range):
         #Find restriction sites in a specified range
         pattern_dict = self.db_retrieve()[1] #Create a dictionary of patterns with enzymes as keys
-        result_list = []
-        nohit_list = []
-        start_list = []
-        updict = {}
-        downdict = {}
-        bluntdict = {}
+        result_list, nohit_list, start_list = [], [], []
+        updict, downdict, bluntdict = {}, {}, {}
         for enz in enz_list:
-            qlist = []
-            bluntlist = []
-            uplist = []
-            down_list = []
-            split_list = []
+            qlist, bluntlist, uplist, down_list, split_list = [], [], [], [], []
             cut = self.db_cutting_info(enz)[0] #Get enzyme cutting information
             result = self.find_pattern(str(sequence), pattern_dict[enz]) #Match pattern
             item = pattern_dict[enz]
@@ -216,26 +204,17 @@ class Search():
     
     def find_sites_out(self, sequence, enz_list, left_range, right_range):
         pattern_dict = self.db_retrieve()[1] #Get pattern dictionary
-        nohit_list = []
-        result_list = []
-        start_list = []
-        downdict = {}
-        updict = {}
-        bluntdict = {}
+        nohit_list, result_list, start_list = [], [], []
+        downdict, updict, bluntdict = {}, {}, {}
         methylation = self.find_methylation(sequence)
         for enz in enz_list:
-            up_list = []
-            down_list = []
-            qlist = []
-            blunt_list = []
-            split_list = []
+            up_list, down_list, qlist, blunt_list, split_list = [], [], [], [], []
             cut = self.db_cutting_info(enz)[0] #Get enzyme cutting info
             result = self.find_pattern(str(sequence), pattern_dict[enz])
             item = pattern_dict[enz]
             print "%s appears at: %s" %(item, result)
             if result == []:
                 nohit_list.append(str(enz))
-         
             else:
                 if left_range == None and right_range == None: #If no ranges specified
                     if cut[enz][4] == -2:
@@ -249,7 +228,6 @@ class Search():
                             qlist.append(num + cut[enz][4])
                             bluntdict[str(enz)] = qlist  
                     else:
-                        
                         if cut[enz][0] == '' and cut[enz][1] == '' and cut[enz][2] == '' and cut[enz][3] == '' and cut[enz][4] == -1: #Enzyme makes blunt cut at end of pattern
                             for num in result: 
                                 blunt_list.append(num)
@@ -771,9 +749,7 @@ class MutationPanel(wx.Panel):
             seq = seq[2:]
         new_seq = seq
         number = int(self.num.GetValue()) #Get number of mutations to insert
-        insert_list = []
-        olist = []
-        nlist = []
+        insert_list, olist, nlist = [], [], []
         silent = self.silent.GetValue() #Check to see if silent mutations required
         back_table = codon_usage_db.db().codon_tables()[1]
         if self.left_mutation_range.GetValue() and self.right_mutation_range.GetValue(): #Check to see if ranges necessary
@@ -782,13 +758,11 @@ class MutationPanel(wx.Panel):
             ranges = False
         num_mutants = int(self.num_mutants.GetValue()) #Get number of mutatnts to create
         j = 0
-        mutseqs = ''
-        aamuts = ''
+        mutseqs, aamuts = '', ''
         if seq:
             if silent: #IF silent mutations required
                 while j < num_mutants: #Until we have desired number of mutants
-                    new_seq = seq
-                    oseq = seq
+                    new_seq, oseq = seq, seq
                     i = 0
                     while i < number:
                         if ranges: #Get random choice from range
@@ -1335,14 +1309,7 @@ class MutationPanel(wx.Panel):
             overlap = 20
         seq_length  = len(self.seq_disp.GetValue())
         num_frags = seq_length/frag_length #Calculate number of fragments that should be created
-        frag_list = []
-        best = []
-        best_sites = []
-        best_starts = []
-        bad_sites = []
-        result = []
-        starts = []
-        sites = []
+        frag_list, best, best_sites, best_starts, bad_sites, result, starts, sites = [], [], [], [], [], [], [], []
         overhangbases = ''
         ambigs = {'N':['A','C','G','T'],'R':['A','G'], 'Y': ['C','T'], 'W':['A','T'],'S':['G','C'],'M':['A','C'], 'K':['G','T'], 'B':['C','G','T'], 'D':['A','G','T'], 'H':['A','C','T'], 'V':['A','C','G']}
         reverse_codon = {'F': ['TTT', 'TTC'],'L': ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'I': ['ATT', 'ATC', 'ATA'], 'M': ['ATG'],
@@ -1607,10 +1574,8 @@ class MutationPanel(wx.Panel):
     
     def find_potential_sites(self, sequence, nb):
         #Find potential restriction enzyme cutting sites
-        rhanger = ''
-        rhangers = ''
-        potential_sites = []
-        potential_enzymes = []
+        rhanger, rhangers = '', ''
+        potential_sites, potential_enzymes = [], []
         self.methylation = Search().find_methylation(str(self.seq_disp.GetValue()))
         a = []
         reverse_codon = {'F': ['TTT', 'TTC'],'L': ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'I': ['ATT', 'ATC', 'ATA'], 'M': ['ATG'],
@@ -1758,8 +1723,7 @@ class MutationPanel(wx.Panel):
         #Event called upon pressing enter in sequence box
         name_list = self.enzyme_listbox.GetItems()
         selected_list = self.get_selected_enzymes()
-        ranges_in = False
-        ranges_out = False
+        ranges_in, ranges_out = False, False
         if selected_list == []:
             #Launch message dialog if no enzymes selected
             dlg = wx.MessageDialog(self, "You have not selected any enzymes!", 'Alert!', wx.ICON_ERROR | wx.OK)
@@ -2130,8 +2094,7 @@ class PotentialPanel(wx.Panel):
        
     def select_sites(self, event):
         #Get selected sites from lists on cutting panel and then mutate out sites
-        enz_list = []
-        site_list = []
+        enz_list, site_list = [], []
         if self.bluntlc.GetFirstSelected() != -1: #Check to see if any are selected
             enz_list.append(str(self.bluntlc.GetItemText(self.bluntlc.GetFirstSelected())))
             site_list.append(self.bluntlc.GetItem(self.bluntlc.GetNextItem(-1, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED), 2).GetText())
@@ -2305,11 +2268,9 @@ class OptimizationPanel(wx.Panel):
     def __init__(self, parent, id, nb, mainframe):
         wx.Panel.__init__(self, parent)
         self.previous_seq = ['']
-        self.left_range = 0
-        self.right_range = 0
+        self.left_range, self.right_range = 0, 0
         self.specific = False
-        self.codon_list = []
-        self.cdn_list = []
+        self.codon_list, self.cdn_list = [], []
         self.nb = self.GetParent()
         self.seq_disp_label = wx.StaticText(self, wx.ID_ANY,"Sequence: ")
         self.seq_disp = wx.TextCtrl(self, size = (475,200), style = wx.TE_PROCESS_ENTER|wx.TE_MULTILINE)
@@ -3122,8 +3083,7 @@ class CuttingPanel(wx.Panel):
         
     def select_sites(self, event):
         #Get selected sites from lists on cutting panel and then mutate out sites
-        elist = []
-        slist =  []
+        elist, slist = [], []
         if self.bluntlc.GetFirstSelected() != -1: #Check to see if any are selected
             elist.append(str(self.bluntlc.GetItemText(self.bluntlc.GetFirstSelected())))
             slist.append(self.bluntlc.GetItem(self.bluntlc.GetNextItem(-1, wx.LIST_NEXT_ALL, wx.LIST_STATE_SELECTED), 2).GetText())
@@ -3177,15 +3137,11 @@ class CuttingPanel(wx.Panel):
     
     def mutate_sites(self, elist, slist, patterns):
         #Mutate out selected restriction sites
-        color_list = []
-        segment_list = []
-        prev_site = 0
+        color_list, segment_list = [], []
+        prev_site, insert, orig_count, new_count = 0, 0, 0, 0
         new_seq = ''
-        insert = 0
         back_table = codon_usage_db.db().codon_tables()[1]
         cdn_dict = self.GetParent().GetPage(0).codon_dict(str(self.GetParent().GetPage(0).seq_disp.GetValue()))[0]
-        orig_count = 0
-        new_count = 0
         dlg = wx.TextEntryDialog(self, 'Sequence Name:', 'Sequence Name') #Get name for sequence
         if dlg.ShowModal() == wx.ID_OK:
             seq_name = str(dlg.GetValue())
@@ -3923,10 +3879,7 @@ class MainFrame(wx.Frame):
         self.nb = self.GetChildren()[0].GetChildren()[0]
         self.seq = self.nb.GetPage(0).seq_disp.GetValue() #Get sequence
         self.rf = self.nb.GetPage(0).rf #Get the reading frame
-        rflist = []
-        start_list = []
-        end_list = []
-        frame_list = []
+        rflist, start_list, end_list, frame_list = [], [], [], []
         self.min_AA = 50
         dlg = wx.TextEntryDialog(self, 'Minimum number of amino acids in betweens start and stop codons:', 'Minimum Number of Amino Acids', '50') #Ask user for the number of amino acids between start and stop codons
         if dlg.ShowModal() == wx.ID_OK:
@@ -4065,8 +4018,7 @@ class MainFrame(wx.Frame):
 
     def read_sequences(self, filename):
         prev_line = ''
-        seq_names = []
-        sequences = []
+        seq_names, sequences = [], []
         with open(filename) as file:
             for line in file:
                 if line.startswith('>'):
