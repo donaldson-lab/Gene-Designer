@@ -7,7 +7,6 @@ import sqlite3
 import wx
 
 class db():
-    
     def __init__(self): 
         #Initialize the class
         self = self
@@ -90,8 +89,3 @@ class TemplatePanel(wx.Panel):
         for pos in pos_tuple:
             selected_list.append(name_list[pos])
         return selected_list
-        
-    
-        
-        
-            

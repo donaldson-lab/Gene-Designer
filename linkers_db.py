@@ -155,9 +155,7 @@ class LinkerPanel(wx.Panel):
         connection.commit()
         
     def fill_form(self, event):
-        self.name = ''
-        self.sequence = ''
-        self.enz = ''
+        self.name, self.sequence, self.enz = '', '', ''
         name_list = self.linker_box.GetItems()
         pos_tuple = self.linker_box.GetSelections()
         selected = ''

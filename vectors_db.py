@@ -1,6 +1,5 @@
 '''
 Created on Jul 30, 2010
-
 @author: Doug Crandell
 '''
 '''
@@ -10,7 +9,6 @@ import sqlite3
 import wx
 
 class db():
-    
     def __init__(self):
         self = self
         
@@ -21,7 +19,6 @@ class db():
         connection.commit()
         
 class VectorPanel(wx.Panel):
-    
     def __init__(self, parent, id):
         wx.Panel.__init__(self, parent)
         self.vector = 'Vector'

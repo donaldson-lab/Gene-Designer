@@ -40,7 +40,6 @@ def main(pdb_file, aln_file):
                     residue_list.append(res_num)
                 prev_res_num = res_num
     index = 0;
-
     start = re.search(sequence[:5], pdb_seq).start()
     for char in sequence:
         print sequence
@@ -51,10 +50,8 @@ def main(pdb_file, aln_file):
             pdb_seq = pdb_seq[:index] + '*' + '\n'
         index += 1
         print pdb_seq
-
     pdb_seq = pdb_seq[start:] + sequence[-start:]
-
-            
+    
     tmp = open('tmp.txt', 'w')
     tmp.write(name1)
     tmp.write(info1)
@@ -66,9 +63,5 @@ def main(pdb_file, aln_file):
     os.remove(aln_file)
     os.rename('tmp.txt', aln_file)
             
-                    
-                
-
 if __name__ == "__main__":
     main(*sys.argv[1:])
-

@@ -165,10 +165,7 @@ class AddEnzymePanel(wx.Panel):
             commercial = str(self.commercial_field.GetValue())
             i = 0
             blunt = -1
-            downstream_top = ''
-            downstream_bottom = ''
-            upstream_top = ''
-            upstream_bottom = '' 
+            downstream_top, downstream_bottom, upstream_top, upstream_bottom = '', '', '', ''
             for char in restriction_sequence:
                 if char == '^':
                     blunt = i

@@ -3,7 +3,6 @@ Created on Aug 6, 2010
 
 @author: virushunter2
 '''
-
 import wx
 from Bio.Seq import Seq
 import numpy
@@ -11,7 +10,6 @@ import math
 import thermodynamic_data as td
 
 class Nussinov():
-    
     def __init__(self, parent, id, sequence):
         self.sequence = str(sequence)
         self.rna_sequence = Seq.transcribe(Seq(self.sequence))
@@ -178,7 +176,6 @@ class Nussinov():
         return string
 
 class RNAPanel(wx.Panel):
-    
     def __init__(self, parent, id, old_rna, old_delta_g, new_rna, new_delta_g):
         wx.Panel.__init__(self, parent)
         self.name = 'RNApanel'
@@ -209,4 +206,3 @@ class RNAPanel(wx.Panel):
         self.new_sizer.AddMany([self.new_structure_sizer, (self.new_delta_sizer, 0, wx.LEFT, 10)])
         self.sizer.AddMany([self.old_sizer, (self.new_sizer, 0, wx.TOP, 10)])
         self.SetSizerAndFit(self.sizer)
-    

@@ -22,7 +22,6 @@ def model(fasta, path):
         seq = seq + '_000000'
         aln_file = seq +'.ali'
     
-    
     with open(pdb) as pdb:
         prev_res_num = -100
         pdb_seq = ''
@@ -50,7 +49,6 @@ def model(fasta, path):
                 prev_res_num = res_num
     
         start = re.search(template_seq[:5], pdb_seq).start()
-        
         first = int(residue_list[re.search(template_seq[:5], pdb_seq).start()])
         last = first + len(template_seq) -2
     command = path + 'proba2pir.pl' 
@@ -86,7 +84,6 @@ def model(fasta, path):
     os.remove(aln_file)
     pdb = os.getcwd()+'/' +template + '.pdb'
     os.rename('tmp.txt', aln_file)
-                
     os.system('mod9v8 model.py %s %s %s' %(aln_file, template, seq))
     os.system('/Applications/MacPyMOL.app/Contents/MacOS/MacPyMOL *.pdb -d')
 

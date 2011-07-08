@@ -3,15 +3,12 @@ Created on Aug 16, 2010
 
 @author: virushunter2
 '''
-
 class CT_to_DB():
-    
     def __init__self(self, filename = []):
         self.filename = filename
     
     def read_file(self, filename):
-        first = []
-        second = []
+        first, second = [], []
         with open(filename) as file:
             delta_g = file.readline().split('\t')[1].strip(' ')
             for line in file:
@@ -31,5 +28,3 @@ class CT_to_DB():
                     string = string[:number] + '(' + string[number+1:]
                     string = string[:int(second[number])-1] + ')' +string[int(second[number]):]
         return string
-            
-                

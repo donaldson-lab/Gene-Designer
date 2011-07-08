@@ -6,13 +6,11 @@ University of North Carolina at Chapel Hill
 '''
 A module that sets up a database for the storage of organism codon bias data
 '''
-
 import sqlite3
 from Bio.Data import CodonTable
 import wx
 
 class db():
-    
     def __init__(self):
         self = self
     

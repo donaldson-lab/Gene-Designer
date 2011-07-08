@@ -16,7 +16,7 @@
 # along with KnotSeeker.  If not, see <http://www.gnu.org/licenses/>.
  
 import os
-import codecs
+import codecs #@UnusedImport
 import sys
 
 # Step1: Find stable hairpin and bulge loops and construct pseudoknots
@@ -34,9 +34,9 @@ def structure_file(stem_list):
             if int(indices[4])-2*int(indices[3]) >= 3:
                 for i in range(int(indices[3])):
                     s += "("
-                for j in range(int(indices[4])-2*int(indices[3])):
+                for j in range(int(indices[4])-2*int(indices[3])): #@UnusedVariable
                     s += ":"
-                for k in range(int(indices[3])):
+                for k in range(int(indices[3])): #@UnusedVariable
                     s += ")"
                 stem_structure.writelines(header)
                 stem_structure.write("\n")
@@ -48,9 +48,9 @@ def structure_file(stem_list):
                 if int(indices[3]) > 3:
                     for i in range(int(indices[3])-1):
                         s += "("
-                    for j in range(int(indices[4])-2*int(indices[3])+2):
+                    for j in range(int(indices[4])-2*int(indices[3])+2): #@UnusedVariable
                         s += ":"
-                    for k in range(int(indices[3])-1):
+                    for k in range(int(indices[3])-1): #@UnusedVariable
                         s += ")"
                 header_new = indices[0] +" "+ indices[1] +" "+ indices[2] +" "+ str(int(indices[3])-1) +" "+indices[4]
                 stem_structure.writelines(header_new)
@@ -68,22 +68,22 @@ def structure_file(stem_list):
             if indices[4] == 'r':       
                 for i in range(int(indices[5])+int(indices[6])):
                     s += "("
-                for j in range(int(indices[2])-int(indices[1])+1-2*int(indices[3])-1):
+                for j in range(int(indices[2])-int(indices[1])+1-2*int(indices[3])-1): #@UnusedVariable
                     s += ":"
-                for k in range(int(indices[6])):
+                for k in range(int(indices[6])): #@UnusedVariable
                     s += ")"
                 s += ":"
-                for k in range(int(indices[5])):
+                for k in range(int(indices[5])): #@UnusedVariable
                     s += ")"
                 stem_structure.writelines(s)
                 stem_structure.write("\n")
             if indices[4] == 'l':
-                for k in range(int(indices[5])):
+                for k in range(int(indices[5])): #@UnusedVariable
                     s += "("
                 s += ":"
-                for k in range(int(indices[6])):
+                for k in range(int(indices[6])): #@UnusedVariable
                     s += "("
-                for j in range(int(indices[2])-int(indices[1])+1-(2*int(indices[3]))-1):
+                for j in range(int(indices[2])-int(indices[1])+1-(2*int(indices[3]))-1): #@UnusedVariable
                     s += ":"
                 for i in range(int(indices[3])):
                     s += ")"                         
@@ -149,7 +149,7 @@ def main(stem_list):
         structure_energy = stem_list[i+2]
         seq = seq.strip()
         field = header.split()
-        stemlength = int(field[3])
+        stemlength = int(field[3]) #@UnusedVariable
         info = structure_energy.split()
         if len(info) > 2:
             energy = info[2]
@@ -200,12 +200,9 @@ def parse_stems(stems_enf):
                             if list[i][4] == 'n':
                                 if list[j] in list_result:
                                     list_result.remove(list[j])
-
     list_second = []
-
     for i in range(len(list_result)):
         list_second.append(list_result[i])
-
     list_result.sort(mycmp)
 
     # Rule 2
@@ -219,7 +216,6 @@ def parse_stems(stems_enf):
                             if list_result[i][4] == 'n':
                                 if list_result[i] in list_second:
                                     list_second.remove(list_result[i])
-
     a = frozenset(list_second)
     result = []
     for element in frozenset(a):
@@ -227,7 +223,6 @@ def parse_stems(stems_enf):
     result.sort()
 
     #### Second round ####
-
     list_second = list[:]
     list_second.sort(mycmp)
     list_third = list[:]
@@ -243,7 +238,6 @@ def parse_stems(stems_enf):
                             if list_second[i][4] == 'n':
                                 if list_second[i] in list_third:
                                     list_third.remove(list_second[i])
-
     list_result = list_third[:]
 
     # Rule 1
@@ -257,14 +251,12 @@ def parse_stems(stems_enf):
                             if list_third[i][4] == 'n':
                                 if list_third[j] in list_result:
                                     list_result.remove(list_third[j])
-
     b = frozenset(list_result)
     list = []
     for element in frozenset(b):
         list.append(element)
     list.sort()
     c = a.union(b)
-
     list = []
     for element in frozenset(c):
         list.append(element)
@@ -272,7 +264,6 @@ def parse_stems(stems_enf):
     return list
 
 ##### Pseudoknot Construction #####
-
 def build_pseudoknots(list):
     pseudoknot_intervals = []
     for x in range(len(list)-1):
@@ -302,7 +293,6 @@ def build_pseudoknots(list):
     return pseudoknot_intervals
                             
 # Write file with filtered hairpin and bulge loops with free energy < 2.0 kcal/mol
-
 def parsed_stems(list,files,output):
     for x in range(len(list)):
         element = list[x]
@@ -324,7 +314,6 @@ def parsed_stems(list,files,output):
                         output.writelines((str(energy),'\n'))
 
 # Write fasta file for pknotsRG input with potential pseudoknot sequence fragments
-
 def fasta(pseudoknot_intervals,sequence,output):
     for i in range(len(pseudoknot_intervals)):
         header = pseudoknot_intervals[i]
@@ -337,8 +326,8 @@ def fasta(pseudoknot_intervals,sequence,output):
         k = int(field[6])
         l = int(field[7])
         stemlength2 = int(field[8])
-        length1 = j-i+1
-        length2 = l-k+1
+        length1 = j-i+1 #@UnusedVariable
+        length2 = l-k+1 #@UnusedVariable
         output.write('> ')
         output.writelines((str(firstindex),' '))
         output.writelines((str(secondindex),' '))
@@ -415,7 +404,6 @@ def script(fasta_file):
     hloops = remove_duplicates(hloops)
 # Generate a list of hairpin and bulge loops
     stem_list = []
-    
     for i in range(len(hloops)):
         header = "> "+str(hloops[i][0])+" "+str(hloops[i][1])+" "+str(hloops[i][2])+" "+str(hloops[i][1]-hloops[i][0]+1)
         sequence = seq[hloops[i][0]-1:hloops[i][1]]
@@ -434,9 +422,7 @@ def script(fasta_file):
     stem_list = []
     for i in output:
         stem_list.append(i)
-    
     stems_enf = main(stem_list)
-
     list = parse_stems(stems_enf)
 
     f = open(fasta_file,'r')
@@ -460,7 +446,6 @@ def script(fasta_file):
     output.close()
 
 # Step2: Given the pknotsRG ouput file, apply the pseudoknot filter and minimum weight independent set calculation 
-
 # Pseudoknot Filter
 def pseudoknot(file):
     pseudoknots = []
@@ -575,7 +560,6 @@ def MWIS(list,sorted_endpointlist):
     Smax1.insert(0,list[last_interval])
     temp_max = temp_max - list[last_interval][4]
 
-    
     for j in range(last_interval-1,-1,-1):
         if round(value[j],2) == round(temp_max,2):
             if list[j][1] -1 <= list[last_interval][0]:    
@@ -645,7 +629,6 @@ def method(file):
 
     for i in range (0,len(list_information)*2,2):
         list_information.insert(i+1,[])
-
     list_init = list[:]
     sorted_endpoint_list = create_sorted_endpointlist(list)
 
@@ -685,19 +668,14 @@ def method(file):
             print result[j][0], result[j][1], result[j][4] 
             print file[result[j][6]+1]
     f.close()
-
     for i in range(len(result)):
         result_large = result[i]
         print_output(result_large,list_energy,list_information,file)
-
     print
 
 ############# MAIN CALL OF PROGRAM #################
-
 # Read fasta file from user input in command line #
-
 fasta_file = sys.argv[1]
-
 f = open(fasta_file,'r')
 id = f.readline()
 seq = f.readline()
@@ -708,7 +686,6 @@ f.close()
 infile.close()
 
 # Call GUUGle and write output in temporary file s#
-
 guugle = os.popen("./guugle/guugle -d 3 -l 50000 input.fasta input.fasta")
 result = guugle.read()
 guugle_file = file("guugle_output.txt",'w')

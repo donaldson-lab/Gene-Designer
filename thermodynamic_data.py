@@ -5,7 +5,6 @@ Created on Aug 9, 2010
 '''
 import numpy
 class Data():
-    
     def __init__(self):
         self = self
     
