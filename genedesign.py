@@ -70,18 +70,24 @@ class Search():
     
     def find_aa_motif(self, sequence, pattern):
         #Build a regular expression and search amino acid sequence for the target.  Allows for ambiguous amino acids
-        aa = 'FLSY*CWPHQRIMTNKVADEG'
+        aa = 'FLSYCWPHQRIMTNKVADEGZ'
         target = ''
-        dictionary = {'X': '[FLSY*CWPHQRIMTNKVADEG]'}
+        dictionary = {'X': '[FLSYCWPHQRIMTNKVADEGZ]'}
         pattern = pattern.upper()
         for char in pattern:
             if char in aa:
                 target += char
+            elif char == '*':
+                target += 'Z'
             else:
                 try:
                     target += dictionary[char]
                 except KeyError:
                     pass
+        sequence = str(sequence)
+        for char in range(len(sequence)):
+            if sequence[char] == '*':
+                sequence = sequence[:char] + "Z" + sequence[char+1:]
         starts = [match.start() for match in re.finditer(target, str(sequence))]
         return starts  
                  
@@ -579,8 +585,8 @@ class MutationPanel(wx.Panel):
         self.vector_listbox.SetSelection(-1)
         self.aa_left_mutation_range.SetValue("")
         self.aa_right_mutation_range.SetValue("")
-        self.fragment_length_disp.SetValue("")
-        self.overlap_length_disp.SetValue("")
+        #self.fragment_length_disp.SetValue("")
+        #self.overlap_length_disp.SetValue("")
         self.commercial_box.SetValue(False)
         self.left_range_out.SetValue("")
         self.left_mutation_range.SetValue("")
@@ -2383,8 +2389,8 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
         self.GetParent().GetPage(0).vector_listbox.SetSelection(-1)
         self.GetParent().GetPage(0).aa_left_mutation_range.SetValue("")
         self.GetParent().GetPage(0).aa_right_mutation_range.SetValue("")
-        self.GetParent().GetPage(0).fragment_length_disp.SetValue("")
-        self.GetParent().GetPage(0).overlap_length_disp.SetValue("")
+        #self.GetParent().GetPage(0).fragment_length_disp.SetValue("")
+        #self.GetParent().GetPage(0).overlap_length_disp.SetValue("")
         self.GetParent().GetPage(0).commercial_box.SetValue(False)
         self.GetParent().GetPage(0).left_range_out.SetValue("")
         self.GetParent().GetPage(0).left_mutation_range.SetValue("")
@@ -3564,6 +3570,10 @@ class CdnFreqFrame(wx.Frame):
             self.lc.SetStringItem(num_items, 1, str(Seq.translate(Seq(item[1]))))
             self.lc.SetStringItem(num_items, 2, str(item[0]))
             self.lc.SetStringItem(num_items, 3, str(item[0]*100/total_codons))
+        '''with open('output.txt', 'w') as f:
+            f.write('Total Codons: ' + str(total_codons) + '\n')
+            for item in codon_dict:
+                f.write(item[1] +'\t'+ str(Seq.translate(Seq(item[1]))) +'\t' + str(item[0]) + '\n')'''
             
 class OpenReadingFramePanel(wx.Panel):
     #Panel with a textbox to display open reading frames
