@@ -227,9 +227,7 @@ class AddOrgPanel(wx.Panel):
         connection = sqlite3.connect(database) #Connect to database
         cursor = connection.cursor()
         org = str(self.organism.GetValue())
-        org_usage = {}
-        codon_list = []
-        flag = False
+        org_usage, codon_list, flag = {}, [], False
         codon_list.extend([self.TTT, self.TTC, self.TTA, self.TTG, self.TCT, self.TCC, self.TCA, self.TCG, self.TAT, self.TAC, self.TAA, self.TAG, self. TGT, self.TGC, self.TGA, self.TGG, self.CTT, self.CTC, self.CTA, self.CTG, self.CCT,
                           self.CCC, self.CCA, self.CCG, self.CAT, self.CAC, self.CAA, self.CAG, self.CGT, self.CGC, self.CGA, self.CGG, self.ATT, self.ATC, self.ATA, self.ATG, self.ACT, self.ACC, self.ACA, self.ACG, self.AAT, self.AAC,
                           self.AAA, self.AAG, self.AGT, self.AGC, self.AGA, self.AGG, self.GTT, self.GTC, self.GTA, self.GTG, self.GCT, self.GCC, self.CGA, self.GCG, self.GAT, self.GAC, self.GAA, self.GAG, self.GGT, self.GGC, self.GGA, self.GGG])

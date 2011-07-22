@@ -23,6 +23,7 @@ import math
 import rna_format_conversion as rfc
 import help
 import homology
+import KnotSeeker
 
 ID_ENZYMEREF = 101
 ID_CODONREF = 102
@@ -112,10 +113,7 @@ class Search():
         db = 're.db'
         connection = sqlite3.connect(db)
         cursor = connection.cursor()
-        cut_dict = {}
-        blunt_dict  = {} #Dictionary for enzymes that cut in one place
-        down_dict = {} #Dictionary for enzymes that cut the strands differently downstream
-        up_dict = {} #Dictionary for enzymes that cut the strands differently upstream
+        cut_dict, blunt_dict, down_dict, up_dict = {}, {}, {}, {}
         cursor.execute('SELECT r_enz_name, downstream_top, downstream_bottom, upstream_top, upstream_bottom, blunt FROM enzymes')
         for row in cursor:
             cutting_list = [row[1], row[2], row[3], row[4], row[5]]
@@ -308,15 +306,12 @@ class MutationPanel(wx.Panel):
         self.name = 'Mutation Panel'
         self.frag = False
         self.search = searchInstance
-        self.enzyme_list = enzyme_list
+        self.enzyme_list, self.vector_list, self.target_list = enzyme_list, vector_list, target_list
         self.vector_list = vector_list
-        self.target_list = target_list
         self.nb = nb
         self.mainframe = mainframe
         self.panel = wx.Panel(self)
-        self.previous_seq = ['']
-        self.previous_vector = ['']
-        self.previous_aaseq = ['']
+        self.previous_seq, self.previous_vector, self.previous_aaseq = [''], [''], ['']
         self.rf = 1 #Set initial reading frame
         #Create sizers
         self.sizer = wx.FlexGridSizer(5,5,5,5)
@@ -660,8 +655,7 @@ class MutationPanel(wx.Panel):
         connection = sqlite3.connect('re.db') #Connect to database
         cursor = connection.cursor()
         cursor.execute('SELECT r_enz_name, commercial FROM enzymes') #Get enzyme names and commerical availabilty from db
-        sourcedict = {}
-        original_list = []
+        sourcedict, original_list = {}, []
         enzyme_listbox = self.GetParent().GetPage(0).enzyme_listbox
         enz_list = self.GetParent().GetPage(0).enzyme_list
         enzyme_listbox.Clear()
@@ -964,8 +958,7 @@ class MutationPanel(wx.Panel):
             seq = seq[1:]
         elif self.rf == 3:
             seq = seq[2:]
-        cdn_dict = {}
-        cdn_list = []
+        cdn_dict, cdn_list = {}, []
         total_cdn = 0
         for char in xrange(len(seq)):
             if char%3 == 0:
@@ -978,13 +971,6 @@ class MutationPanel(wx.Panel):
     
     def codon_frequency(self, event):
         #Get frequency of appearance of codons and display in table
-        cdn_dict = self.codon_dict(str(self.seq_disp.GetValue()))[0]
-        total_cdn = self.codon_dict(str(self.seq_disp.GetValue()))[1]
-        self.dlg = CdnFreqFrame(self, -1, cdn_dict, total_cdn)
-        self.dlg.Show(True)
-        return cdn_dict
-    
-    def cdn_frequency(self):
         cdn_dict = self.codon_dict(str(self.seq_disp.GetValue()))[0]
         total_cdn = self.codon_dict(str(self.seq_disp.GetValue()))[1]
         self.dlg = CdnFreqFrame(self, -1, cdn_dict, total_cdn)
@@ -1032,7 +1018,7 @@ class MutationPanel(wx.Panel):
         codon_percentage = {}
         #Get dictionary of appearance frequency for list of codons in selected organism
         if self.GetParent().GetParent().GetParent().get_organism() == 'Current sequence':
-            codon_percentage = self.cdn_frequency()
+            codon_percentage = self.codon_frequency()
         else:
             db = 'codon_usage.db'
             connection = sqlite3.connect(db)
@@ -1081,13 +1067,9 @@ class MutationPanel(wx.Panel):
         aa = str(self.aa_disp.GetValue())
         self.mutation_seq_disp.SetStyle(0, len(text), wx.TextAttr('black', 'white'))
         self.mutation_aa_disp.SetStyle(0, len(aatext), wx.TextAttr('black', 'white'))
-        site_list = []
-        aa_site_list = []
+        site_list, aa_site_list = [], []
         split = text.split('\n')
-        i = 0
-        sum = 0
-        aasum = 0
-        j = 0
+        i, sum, aasum, j = 0, 0, 0, 0
         if type == 'rm':
             for item in split:
                 if i%2 == 0:
@@ -1185,9 +1167,7 @@ class MutationPanel(wx.Panel):
         new_seq = str(self.seq_disp.GetValue())
         mut_seq = str(self.mutation_seq_disp.GetValue())
         aa_seq = str(self.mutation_aa_disp.GetValue())
-        ilist = []
-        olist = []
-        nlist = []
+        ilist, olist, nlist = [], [], []
         for char in xrange(len(original_translation)):
             max = 0
             maxc = ''
@@ -1286,8 +1266,7 @@ class MutationPanel(wx.Panel):
     def cutting_results(self, event, bluntdict, topdict, botdict, starts, splits, nohitlist, seq, methylation, nb):
         #Create panels for displaying the cutting results and resulting graphical interpretation ("cut drawing") and add to notebook
         #Remove Cutting Results pages from notebook if already exist
-        number = 0
-        num  = 0
+        number, num = 0, 0
         for page in nb.GetChildren():
             if hasattr(page, 'name'):
                 if page.name == 'Cutting Panel':
@@ -1581,9 +1560,8 @@ class MutationPanel(wx.Panel):
     def find_potential_sites(self, sequence, nb):
         #Find potential restriction enzyme cutting sites
         rhanger, rhangers = '', ''
-        potential_sites, potential_enzymes = [], []
+        potential_sites, potential_enzymes, a = [], [], []
         self.methylation = Search().find_methylation(str(self.seq_disp.GetValue()))
-        a = []
         reverse_codon = {'F': ['TTT', 'TTC'],'L': ['TTA', 'TTG', 'CTT', 'CTC', 'CTA', 'CTG'], 'I': ['ATT', 'ATC', 'ATA'], 'M': ['ATG'],
                          'V': ['GTT', 'GTC', 'GTA', 'GTG'], 'S': ['TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'], 'P': ['CCT', 'CCC', 'CCA', 'CCG'],
                          'T': ['ACT', 'ACC', 'ACA', 'ACG'], 'A': ['GCT', 'GCC', 'GCA', 'GCG'], 'Y': ['TAT', 'TAC'], '*': ['TAA', 'TAG', 'TGA'],
@@ -1738,10 +1716,7 @@ class MutationPanel(wx.Panel):
         selected_list = sorted(selected_list) #Sort enzyme list
         seq = self.seq_disp.GetValue()
         #Get which checkboxes are selected for number of times enzymes should cut the sequence
-        all = self.all_cutters()
-        one = self.one_cutters()
-        two = self.two_cutters()
-        three = self.three_cutters()
+        all, one, two, three = self.all_cutters(), self.one_cutters(), self.two_cutters(), self.three_cutters()
         # Determine the range to look for cut
         if self.left_range_in.GetValue() and self.right_range_in.GetValue():
             ranges_in = True #Only look inside of certain range
@@ -1988,8 +1963,7 @@ class PotentialPanel(wx.Panel):
     def __init__(self, parent, id, potential_sites, potential_enzymes, methylation, title = 'Potential Restriction Enzyme Sites'):
         wx.Panel.__init__(self, parent)
         self.potential = ''
-        self.potential_sites = potential_sites
-        self.potential_enzymes = potential_enzymes
+        self.potential_sites, self.potential_enzymes = potential_sites, potential_enzymes
         self.rf = self.GetParent().GetPage(0).rf
         self.cuts = self.GetParent().GetPage(0).call_db_cutting_info(self.potential_enzymes)
         self.patterns = self.GetParent().GetPage(0).call_db_retrieve()
@@ -2151,8 +2125,7 @@ class PotentialPanel(wx.Panel):
             overhang = len(pseq)%3
             if overhang != 0:
                 overhangbases = pseq[-overhang:]
-            j = 0
-            k = 0
+            j, k = 0, 0
             p = int(site)
             insert = ''
             translation = str(Seq.translate(Seq(pseq)))
@@ -2163,9 +2136,7 @@ class PotentialPanel(wx.Panel):
                 else:
                     a = patterns[enzyme][k:k+3]
                     codons = reverse_codon[char]
-                    onepos = []
-                    twopos = []
-                    threepos = []
+                    onepos, twopos, threepos = [], [], []
                     for codon in codons:
                         m = 0
                         for cchar in codon:
@@ -2179,9 +2150,7 @@ class PotentialPanel(wx.Panel):
                                 if cchar not in threepos:
                                     threepos.append(cchar)
                             m +=1
-                    m = 0
-                    insert1 = ''
-                    choicelist = []
+                    m, insert1, choicelist = 0, '', []
                     for pchar in a:
                         if m == 0:
                             if pchar not in ambigs:
@@ -2260,8 +2229,7 @@ class PotentialPanel(wx.Panel):
             self.new_seq = self.new_seq[:int(site)] +insert+ self.new_seq[int(site)+len(insert):]
             self.OrigSeq.SetValue(self.seq)
             self.NewSeq.SetValue(self.new_seq)
-        h = 0
-        color_list = []
+        h, color_list = 0, []
         for char in self.new_seq:
             if self.seq[h] != char:
                 color_list.append(h)
@@ -2418,9 +2386,9 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
         file = './tmp.fasta'
         with open ('tmp.fasta', 'w') as filename:
             filename.write('>\n' + str(self.seq_disp.GetValue()))
-        os.system('python KnotSeeker.py %s' %file)
-        i = 0
-        string = ""
+        #os.system('python KnotSeeker.py %s' %file)
+        KnotSeeker.maincall(file)
+        i, string = 0, ""
         with open('output.txt', 'r') as file:
             for line in file:
                 if i == 0:
@@ -2453,10 +2421,7 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
                       'CTT', 'CTC', 'CTA', 'CTG', 'CCT', 'CCC', 'CCA', 'CCG', 'CAT', 'CAC', 'CAA', 'CAG', 'CGT', 'CGC', 'CGA', 'CGG',
                       'ATT', 'ATC', 'ATA', 'ATG', 'ACT', 'ACC', 'ACA', 'ACG', 'AAT', 'AAC', 'AAA', 'AAG', 'AGT', 'AGC', 'AGA', 'AGG',
                       'GTT', 'GTC', 'GTA', 'GTG', 'GCT', 'GCC', 'GCA', 'GCG', 'GAT', 'GAC', 'GAA', 'GAG', 'GGT', 'GGC', 'GGA', 'GGG']
-        aa_list = []
-        bad_codons = []
-        self.cdn_list = []
-        self.codon_list = []
+        aa_list, bad_codons, self.cdn_list, self.codon_list = [], [], [], []
         values = string.split(',')
         amino_acids = {'A': 'ALANINE', 'R': 'ARGININE', 'N': 'ASPARAGINE', 'D': 'ASPARTIC ACID', 'C': 'CYSTEINE', 'E': 'GLUTAMIC ACID', 'Q': 'GLUTAMINE', 'G': 'GLYCINE', 'H': 'HISTIDINE', 'I': 'ISOLEUCINE', 'L': 'LEUCINE',
                        'K': 'LYSINE', 'M': 'METHIONINE', 'F': 'PHENYLALANINE', 'P': 'PROLINE', 'S': 'SERINE', 'T': 'THREONINE', 'W': 'TRYPTOPHAN', 'Y': 'TYROSINE', 'V': 'VALINE'}
@@ -2570,9 +2535,8 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
         
     def deoptimize(self):
         #Replace codons with codons used least frequently by selected organism
-        new_seq = ''
+        new_seq, new_dict = '', {}
         percentages = self.get_organism()
-        new_dict = {}
         cdns = ['TTT', 'TTC', 'TTA', 'TTG', 'TCT', 'TCC', 'TCA', 'TCG', 'TAT', 'TAC', 'TAA', 'TAG', 'TGT', 'TGC', 'TGA', 'TGG',
                       'CTT', 'CTC', 'CTA', 'CTG', 'CCT', 'CCC', 'CCA', 'CCG', 'CAT', 'CAC', 'CAA', 'CAG', 'CGT', 'CGC', 'CGA', 'CGG',
                       'ATT', 'ATC', 'ATA', 'ATG', 'ACT', 'ACC', 'ACA', 'ACG', 'AAT', 'AAC', 'AAA', 'AAG', 'AGT', 'AGC', 'AGA', 'AGG',
@@ -2643,7 +2607,10 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
                                 if cdn == '':
                                     value = 101
                                     for codon in codons:
-                                        new_value = percentages[codon]
+                                        try:
+                                            new_value = percentages[codon]
+                                        except KeyError:
+                                            pass
                                         if new_value < value:
                                             value = new_value
                                             cdn = codon
@@ -2651,7 +2618,10 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
                     else:
                         for codon in codons:
                             if codon in percentages:
-                                new_value = percentages[codon]
+                                try:
+                                    new_value = percentages[codon]
+                                except KeyError:
+                                    pass
                                 if new_value < value:
                                     value = new_value
                                     cdn = codon
@@ -2679,10 +2649,7 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
             new_delta_g = filter(lambda x: x.isdigit() or x is '-' or x is '.', pairs[2])
             new_structure = rfc.CT_to_DB.dot_bracket(rfc.CT_to_DB(), pairs[0], pairs[1])
         else:
-            old_structure = ''
-            new_structure = ''
-            old_delta_g = ''
-            new_delta_g = ''
+            old_structure, new_structure, old_delta_g, new_delta_g = '', '', '', ''
         number = 0
         if self.rna_structure.GetValue():
             for page in self.nb.GetChildren():
@@ -2699,10 +2666,8 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
                
     def optimize(self):
         #Replace codons in sequence with codons used most frequently by selected organism
-        new_seq = ''
-        paired = []
+        new_seq, paired, new_dict = '', [], {}
         percentages = self.get_organism()
-        new_dict = {}
         cdns = ['TTT', 'TTC', 'TTA', 'TTG', 'TCT', 'TCC', 'TCA', 'TCG', 'TAT', 'TAC', 'TAA', 'TAG', 'TGT', 'TGC', 'TGA', 'TGG',
                       'CTT', 'CTC', 'CTA', 'CTG', 'CCT', 'CCC', 'CCA', 'CCG', 'CAT', 'CAC', 'CAA', 'CAG', 'CGT', 'CGC', 'CGA', 'CGG',
                       'ATT', 'ATC', 'ATA', 'ATG', 'ACT', 'ACC', 'ACA', 'ACG', 'AAT', 'AAC', 'AAA', 'AAG', 'AGT', 'AGC', 'AGA', 'AGG',
@@ -2753,30 +2718,37 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
                     proceed = False
                     break
             if proceed == True and original_codon in cdns:
-                    value = 0
-                    cdn = ''
+                    value, cdn = 0, ''
                     codons = backtable[char]
                     if reversion:
                         for codon in codons:
-                            if self.hamming_distance(codon, original_codon) > 1:
-                                new_value = percentages[codon]
-                                if new_value > value:
-                                    value = new_value
-                                    cdn = codon
-                            if cdn == '':
-                                value = 0
-                                for codon in codons:
+                            if codon in percentages:
+                                if self.GetParent().GetPage(0).hamming_distance(codon, original_codon) > 1:
                                     new_value = percentages[codon]
-                                    if new_value > value:
+                                    if new_value < value:
                                         value = new_value
                                         cdn = codon
+                                if cdn == '':
+                                    value = 101
+                                    for codon in codons:
+                                        try:
+                                            new_value = percentages[codon]
+                                        except KeyError:
+                                            pass
+                                        if new_value < value:
+                                            value = new_value
+                                            cdn = codon
                         new_seq += cdn
                     else:
                         for codon in codons:
-                            new_value = percentages[codon]
-                            if new_value > value:
-                                value = new_value
-                                cdn = codon
+                            if codon in percentages:
+                                try:
+                                    new_value = percentages[codon]
+                                except KeyError:
+                                    pass
+                                if new_value < value:
+                                    value = new_value
+                                    cdn = codon
                         new_seq += cdn
             else:
                 new_seq += original_codon
@@ -2798,10 +2770,7 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
             new_delta_g = filter(lambda x: x.isdigit() or x is '-' or x is '.', pairs[2])
             new_structure = rfc.CT_to_DB.dot_bracket(rfc.CT_to_DB(), pairs[0], pairs[1])
         else:
-            old_structure = ''
-            new_structure = ''
-            old_delta_g = ''
-            new_delta_g = ''
+            old_structure, new_structure, old_delta_g, new_delta_g = '', '', '', ''
         number = 0
         if self.rna_structure.GetValue():
             for page in self.nb.GetChildren():
@@ -2835,14 +2804,7 @@ class CuttingPanel(wx.Panel):
     def __init__(self, parent, id, search, blunt_dict, down_dict, up_dict, starts, splits, nohitlist, seq, methylation, title = 'Restriction Enzyme Cutting Results'):
         wx.Panel.__init__(self, parent)
         self.name = 'Cutting Panel'
-        self.search = search
-        self.blunt_dict = blunt_dict
-        self.down_dict = down_dict
-        self.up_dict = up_dict
-        self.nohitlist = nohitlist
-        self.starts = starts
-        self.seq = seq
-        self.enzyme_list = []
+        self.search, self.blunt_dict, self.down_dict, self.up_dict, self.nohitlist, self.starts, self.seq, self.enzyme_list = search, blunt_dict, down_dict, up_dict, nohitlist, starts, seq, []
         self.pattern_dict = Search().db_retrieve()[1]
         self.bluntlabel = wx.StaticText(self, wx.ID_ANY, 'Symmetric Cuts:')
         self.downlabel = wx.StaticText(self, wx.ID_ANY, 'Unsymmetric Downstream Cuts:')
@@ -2885,8 +2847,7 @@ class CuttingPanel(wx.Panel):
         else:
             self.enz_list = self.GetParent().GetPage(0).enzyme_list
             self.rf = self.GetParent().GetPage(0).rf
-        start_dict = {}
-        split_dict = {}
+        start_dict, split_dict = {}, {}
         for enzyme in blunt_dict.iterkeys():
             self.enzyme_list.append(enzyme)
         for enzyme in down_dict.iterkeys():
@@ -2933,8 +2894,7 @@ class CuttingPanel(wx.Panel):
                     split_dict[enz] = sorted(splits[i], reverse=True)
                     i +=1
         num_items_blunt = self.bluntlc.GetItemCount()
-        bluntlist = []
-        klist =  []
+        bluntlist, klist = [], []
         #Populate blunt list
         for k in sorted(blunt_dict.iterkeys(), reverse=True):
             v = blunt_dict[k]
@@ -2977,9 +2937,7 @@ class CuttingPanel(wx.Panel):
         self.downlc.InsertColumn(3, 'Target Start')
         self.downlc.SetColumnWidth(3, 75)
         num_items_down = self.downlc.GetItemCount()
-        klist = []
-        downlist = []
-        uplist = []
+        klist, downlist, uplist = [], [], []
         #Populate downstream list
         for k in sorted(down_dict.iterkeys(), reverse=True):
             v = down_dict[k]
@@ -3026,9 +2984,7 @@ class CuttingPanel(wx.Panel):
         self.uplc.InsertColumn(3, 'Target Start')
         self.uplc.SetColumnWidth(3, 75)
         num_items_up = self.uplc.GetItemCount()
-        klist = []
-        downlist = []
-        uplist = []
+        klist, downlist, uplist = [], [], []
         #Populate upstream list
         for k in sorted(up_dict.iterkeys(), reverse=True):
             v = up_dict[k]
@@ -3117,8 +3073,7 @@ class CuttingPanel(wx.Panel):
         self.mutate_sites(elist, slist, patterns) #Mutate out sites  
     
     def retrieve_methylation(self, list):
-        pattern_dict = {}
-        methylation_dict = {}
+        pattern_dict, methylation_dict = {}, {}
         connection = sqlite3.connect('re.db')
         cursor = connection.cursor()
         cursor.execute('SELECT r_enz_name, pattern, methylation FROM enzymes')
@@ -3604,22 +3559,13 @@ class OpenReadingFramePanel(wx.Panel):
         self.nucleotides = self.text.split('\n')[2]
         self.GetParent().GetParent().GetParent().add_organism(event)
 
-        
 class MainFrame(wx.Frame):
     def __init__(self, parent, id, title, searchInstance, enzyme_list, target_list, vector_list):
         wx.Frame.__init__(self, parent, -1, title)
-        self.searchInstance = searchInstance
-        self.enzyme_list = enzyme_list
-        self.vector_list = vector_list
-        self.target_list = target_list
+        self.searchInstance, self.enzyme_list, self.vector_list, self.target_list = searchInstance, enzyme_list, vector_list, target_list
         self.panel = wx.Panel(self)
-        self.seq_undoredo = 0
-        self.vector_undoredo = 0
-        self.aaseq_undoredo = 0
-        self.seq_undo = False
-        self.vector_undo = False
-        self.aaseq_undo = False
-        self.optimization_undo = False
+        self.seq_undoredo, self.vector_undoredo, self.aaseq_undoredo = 0, 0, 0
+        self.seq_undo, self.vector_undo, self.aaseq_undo, self.optimization_undo = False, False, False, False
         self.nb = wx.Notebook(self.panel, style = wx.NB_BOTTOM) #Initialize the notebook
         #Create initial pages for notebook
         self.mutation_page = MutationPanel(self.nb, -1, searchInstance, enzyme_list, vector_list, target_list, self.nb, self)
@@ -4027,8 +3973,7 @@ class MainFrame(wx.Frame):
         self.nb.SetSelection(self.nb.GetPageCount()-1)
 
     def read_sequences(self, filename):
-        prev_line = ''
-        seq_names, sequences = [], []
+        prev_line, seq_names, sequences = '', [], []
         with open(filename) as file:
             for line in file:
                 if line.startswith('>'):

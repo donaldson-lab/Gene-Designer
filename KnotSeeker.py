@@ -16,7 +16,7 @@
 # along with KnotSeeker.  If not, see <http://www.gnu.org/licenses/>.
  
 import os
-import codecs #@UnusedImport
+#import codecs #@UnusedImport
 import sys
 
 # Step1: Find stable hairpin and bulge loops and construct pseudoknots
@@ -412,7 +412,7 @@ def script(fasta_file):
 
     stem_list = bulges(stem_list)
     structure_file(stem_list)
-    eval = os.popen("cat stem_structure.txt | ./ViennaRNA-1.8.4/Progs/RNAeval")
+    eval = os.popen("cat stem_structure.txt | ./RNAeval")
     energy = eval.read()
     output = file("stems_energy.txt",'w')
     output.write(energy)    
@@ -439,7 +439,7 @@ def script(fasta_file):
     parsed_stems(list,stems_enf,output)
     output.close()
 
-    result = os.popen("./pknotsRG-1.3/src/pknotsRG -p 9 -n 0.3 -F pknotsRG_input.txt")
+    result = os.popen("./pknotsRG -p 9 -n 0.3 -F pknotsRG_input.txt")
     pseudoknots = result.read()
     output = file("pknotsRG_output.txt",'w')
     output.write(pseudoknots)    
@@ -675,34 +675,35 @@ def method(file):
 
 ############# MAIN CALL OF PROGRAM #################
 # Read fasta file from user input in command line #
-fasta_file = sys.argv[1]
-f = open(fasta_file,'r')
-id = f.readline()
-seq = f.readline()
-infile = open("input.fasta","w")
-print >> infile, id.strip()
-print >> infile, seq.strip()
-f.close()
-infile.close()
-
-# Call GUUGle and write output in temporary file s#
-guugle = os.popen("./guugle/guugle -d 3 -l 50000 input.fasta input.fasta")
-result = guugle.read()
-guugle_file = file("guugle_output.txt",'w')
-guugle_file.write(result)   
-guugle_file.close()
-print "Pseudoknot detection starts..."
-script("input.fasta")
-
-f = open('pknotsRG_output.txt','r')
-files = f.readlines()
-f.close()
-pseudoknots = pseudoknot(files)
-f = open('hairpin_bulge.txt','r')
-files = f.readlines()
-f.close()
-for i in range(len(pseudoknots)):
-    files.append(pseudoknots[i])
-method(files)
+def maincall(input):
+    fasta_file = input
+    f = open(fasta_file,'r')
+    id = f.readline()
+    seq = f.readline()
+    infile = open("input.fasta","w")
+    print >> infile, id.strip()
+    print >> infile, seq.strip()
+    f.close()
+    infile.close()
+    
+    # Call GUUGle and write output in temporary file s#
+    guugle = os.popen("./guugle -d 3 -l 50000 input.fasta input.fasta")
+    result = guugle.read()
+    guugle_file = file("guugle_output.txt",'w')
+    guugle_file.write(result)   
+    guugle_file.close()
+    print "Pseudoknot detection starts..."
+    script("input.fasta")
+    
+    f = open('pknotsRG_output.txt','r')
+    files = f.readlines()
+    f.close()
+    pseudoknots = pseudoknot(files)
+    f = open('hairpin_bulge.txt','r')
+    files = f.readlines()
+    f.close()
+    for i in range(len(pseudoknots)):
+        files.append(pseudoknots[i])
+    method(files)
 
 

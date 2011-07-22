@@ -11,8 +11,7 @@ Enzyme data comes from the Rebase database.  This code in this module is based o
 import sqlite3
 import wx
 
-class db():
-    
+class db():   
     def __init__(self, filename): 
         #Initialize the class
         self.filename = filename  
