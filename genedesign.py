@@ -23,7 +23,7 @@ import math
 import rna_format_conversion as rfc
 import help
 import homology
-import KnotSeeker
+#import KnotSeeker
 
 ID_ENZYMEREF = 101
 ID_CODONREF = 102
@@ -2386,31 +2386,36 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
         file = './tmp.fasta'
         with open ('tmp.fasta', 'w') as filename:
             filename.write('>\n' + str(self.seq_disp.GetValue()))
-        #os.system('python KnotSeeker.py %s' %file)
-        KnotSeeker.maincall(file)
+        os.system('python KnotSeeker.py %s' %file)
         i, string = 0, ""
-        with open('output.txt', 'r') as file:
-            for line in file:
-                if i == 0:
-                    string = string + 'Pseudoknot start:' + line
-                if i == 1:
-                    string = string + 'Pseudoknot end:' + line
-                if i == 2:
-                    string = string + 'Energy:' + line
-                if i == 3:
-                    string = string + line + '\n'
-                    i = -1
-                i += 1
+        try:
+            with open('output.txt', 'r') as file:
+                for line in file:
+                    if i == 0:
+                        string = string + 'Pseudoknot start:' + line
+                    if i == 1:
+                        string = string + 'Pseudoknot end:' + line
+                    if i == 2:
+                        string = string + 'Energy:' + line
+                    if i == 3:
+                        string = string + line + '\n'
+                        i = -1
+                    i += 1
+        except IOError:
+            pass
         self.pseudoknot_disp.SetValue(string)
-        os.remove('output.txt')
-        os.remove('pknotsRG_input.txt')
-        os.remove('pknotsRG_output.txt')
-        os.remove('guugle_output.txt')
-        os.remove('hairpin_bulge.txt')
-        os.remove('stem_structure.txt')
-        os.remove('stems_energy.txt')
-        os.remove('tmp.fasta')
-        os.remove('input.fasta')
+        try:
+            os.remove('output.txt')
+            os.remove('pknotsRG_input.txt')
+            os.remove('pknotsRG_output.txt')
+            os.remove('guugle_output.txt')
+            os.remove('hairpin_bulge.txt')
+            os.remove('stem_structure.txt')
+            os.remove('stems_energy.txt')
+            os.remove('tmp.fasta')
+            os.remove('input.fasta')
+        except OSError:
+            pass
                          
     def specific_optimization(self, event):
         #Method which allows user to specify specific amino acids or codons to optimize
