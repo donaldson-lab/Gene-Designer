@@ -969,6 +969,11 @@ class MutationPanel(wx.Panel):
             cdn_dict[codon] +=1
         return cdn_dict, total_cdn
     
+    def cdn_freq(self):
+        cdn_dict = self.codon_dict(str(self.seq_disp.GetValue()))[0]
+        total_cdn = self.codon_dict(str(self.seq_disp.GetValue()))[1] #@UnusedVariable
+        return cdn_dict
+    
     def codon_frequency(self, event):
         #Get frequency of appearance of codons and display in table
         cdn_dict = self.codon_dict(str(self.seq_disp.GetValue()))[0]
@@ -1018,7 +1023,7 @@ class MutationPanel(wx.Panel):
         codon_percentage = {}
         #Get dictionary of appearance frequency for list of codons in selected organism
         if self.GetParent().GetParent().GetParent().get_organism() == 'Current sequence':
-            codon_percentage = self.codon_frequency()
+            codon_percentage = self.cdn_freq()
         else:
             db = 'codon_usage.db'
             connection = sqlite3.connect(db)
@@ -2403,7 +2408,10 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
                     i += 1
         except IOError:
             pass
-        self.pseudoknot_disp.SetValue(string)
+        if string != "":
+            self.pseudoknot_disp.SetValue(string)
+        else:
+            self.pseudoknot_disp.SetValue('No Pseudoknots detected')
         try:
             os.remove('output.txt')
             os.remove('pknotsRG_input.txt')
@@ -2615,7 +2623,7 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
                                         try:
                                             new_value = percentages[codon]
                                         except KeyError:
-                                            pass
+                                            new_value = 0
                                         if new_value < value:
                                             value = new_value
                                             cdn = codon
@@ -2626,7 +2634,7 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
                                 try:
                                     new_value = percentages[codon]
                                 except KeyError:
-                                    pass
+                                    new_value = 0
                                 if new_value < value:
                                     value = new_value
                                     cdn = codon
@@ -2739,8 +2747,8 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
                                         try:
                                             new_value = percentages[codon]
                                         except KeyError:
-                                            pass
-                                        if new_value < value:
+                                            new_value = 101
+                                        if new_value > value:
                                             value = new_value
                                             cdn = codon
                         new_seq += cdn
@@ -2750,8 +2758,8 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
                                 try:
                                     new_value = percentages[codon]
                                 except KeyError:
-                                    pass
-                                if new_value < value:
+                                    new_value = 101
+                                if new_value > value:
                                     value = new_value
                                     cdn = codon
                         new_seq += cdn

@@ -1,0 +1,26 @@
+<html>
+<body bgcolor="#C0C0C0">
+<h2>Optimizing Sequences</h2>
+<p><a href="help.html">Back to Main Help Navigation Page</a><p>
+<p>Optimize or deoptimize a sequence with respect to codon frequency without changing amino acid sequence</p>
+<img src="sequence_boxes.png" alt="Sequence Boxes"/>
+<p>A random nucleotide sequence optimized with respect to E. coli K-12 codon frequency</p>
+</br>
+<p>The sequence box is linked with the sequence box on the Mutations panel, so changes in one will be reflected in the other.  Optimized sequences can be exported as FASTA files.</p>
+<h3>Options</h3>
+<ul>
+<li>Avoid Reversion--(de)optimizes sequence ensuring that the amino acid sequence is unchanged and a two nucleotide difference between codons (when possible)
+to prevent new sequence reverting to the original</li>
+<li>Use Sequence Codon Frequency--Computes the codon frequency of the current sequence and uses the frequencies to optimize.  Otherwise, the codon frequency of the 
+currently selected organism in the Codon Usage database is used.  Different organisms can be selected/added/deleted using the <a href="codon_usage.html">databases menu.</a></li>
+<li>Preserve RNA Secondary Structure--Computes an approximate RNA secondary structure and mutates to preserve as much of structure as possible.
+<li>Deoptimization Range--Nucleotide range to deoptimize sequence between</li>
+<li>Optimization Range--Nucleotide range to optimize sequence between</li>
+</ul>
+
+<h3>Specific Optimizaiton</h3>
+<p>Allows optimization for select amino acids or codons rather than all of them.  Detailed instructions are found on the optimization panel.<p>
+
+
+</body>
+</html>
