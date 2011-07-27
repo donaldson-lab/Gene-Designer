@@ -425,7 +425,7 @@ class MutationPanel(wx.Panel):
         #self.overlap_length_disp.SetValue(str(20))
         #self.fragment_length_text = wx.StaticText(self.panel, -1, 'Fragment Length:')
         #self.overlap_length_text = wx.StaticText(self.panel, -1, 'Overlap Length (min:20; max:100):')
-        self.potential_button = wx.Button(self.panel, -1, 'Find Potential Sites')
+        self.potential_button = wx.Button(self.panel, -1, 'Find Potential Restriction Sites')
         self.potential_button.Bind(wx.EVT_LEFT_DOWN, lambda evt, sequence = str(self.seq_disp.GetValue()): self.find_potential_sites(sequence, self.nb))
         #Enzyme list and options
         self.enzyme_listbox_label = wx.StaticText(self.panel, wx.ID_ANY,"Enzymes: ")
@@ -3577,6 +3577,7 @@ class MainFrame(wx.Frame):
         wx.Frame.__init__(self, parent, -1, title)
         self.searchInstance, self.enzyme_list, self.vector_list, self.target_list = searchInstance, enzyme_list, vector_list, target_list
         self.panel = wx.Panel(self)
+        self.panel.SetBackgroundColour("#E0DFDB")
         self.seq_undoredo, self.vector_undoredo, self.aaseq_undoredo = 0, 0, 0
         self.seq_undo, self.vector_undo, self.aaseq_undo, self.optimization_undo = False, False, False, False
         self.nb = wx.Notebook(self.panel, style = wx.NB_BOTTOM) #Initialize the notebook
@@ -3997,7 +3998,7 @@ class MainFrame(wx.Frame):
             return seq_names, sequences
         
 if __name__ == "__main__":
-    filename = os.getcwd() + '/type2.103' #File from REBASE
+    filename = os.getcwd() + '/type2.107' #File from REBASE
     if not os.path.exists('re.db'): #Create the restriction enzyme database if it doesn't exist already
         build_re_db.db.read_enzymes_from_file(build_re_db.db(filename), filename)
     if not os.path.exists('codon_usage.db'): #Create the codon usage database if it doesn't exist already
