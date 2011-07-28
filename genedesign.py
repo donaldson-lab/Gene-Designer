@@ -2618,7 +2618,7 @@ ALL can also be used in conjunction with !, so ALL, !G optimizes codons for all 
                                         value = new_value
                                         cdn = codon
                                 if cdn == '':
-                                    value = 101
+                                    value = 0
                                     for codon in codons:
                                         try:
                                             new_value = percentages[codon]
